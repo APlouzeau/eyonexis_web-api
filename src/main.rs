@@ -1,7 +1,3 @@
-use axum::{Router, routing::get};
-use axum::Extension;
-use sqlx::MySqlPool;
-mod db;
 
 async fn health() -> &'static str {
     "OK"
@@ -15,24 +11,32 @@ async fn db_status(Extension(pool): Extension<MySqlPool>) -> &'static str {
     }
 }
 
-// 3. Fonction main
-#[tokio::main]  // ← Cette macro transforme main en async
-async fn main() {
-    let pool = db::connect().await.expect("Failed to connect to the database");
-    println!("Connected to the database successfully!");
-    
-    // Créer le router
-    let app = Router::new()
-        .route("/health", get(health))
-        .route("/db", get(db_status))
-        .layer(Extension(pool));
+mod db;
+mod routes;
+mod handlers;
+mod models;
 
-    // Lancer le serveur
+use axum::Extension;
+
+#[tokio::main]
+async fn main() {
+    // 1. DB
+    let pool = db::connect()
+        .await
+        .expect("❌ Failed to connect to DB");
+    println!("✅ Connected to DB");
+    
+    // 2. Router global (compose tous les sous-routers)
+    let app = 
+        routes::health::router()
+        .merge(routes::notes::router())  // ← Ajoute /notes/*
+        .layer(Extension(pool));
+    
+    // 3. Serveur
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
         .await
         .unwrap();
-
-    println!("🚀 Server running on http://localhost:3000");
-
+    
+    println!("🚀 Server on http://localhost:3000");
     axum::serve(listener, app).await.unwrap();
 }
