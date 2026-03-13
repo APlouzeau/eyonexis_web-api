@@ -1,6 +1,7 @@
 mod db;
 mod features;
 mod app_state;
+mod error;
 
 use app_state::AppState;
 
