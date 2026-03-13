@@ -6,8 +6,10 @@ use axum::{
 };
 
 use serde::Deserialize;
-use crate::features::notes::model::Note;
 use uuid::Uuid;
+
+use crate::features::notes::model::Note;
+use crate::features::notes::repository::NotesRepository;
 use crate::app_state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -17,15 +19,12 @@ pub struct CreateNotePayload {
 }
 
 pub async fn list(State(state): State<AppState>) -> Json<Vec<Note>> {
-    // on l'utilise en lisant explicitement la propriété de l'état :
-    println!("La base de donnée a max de {} connexions actives", state.db.options().get_max_connections());
-    
-    // Suite factice 
-    Json(vec![])
+    let notes = NotesRepository::list(&state.db).await;
+    Json(notes)
 }
 
-pub async fn get_by_id(Path(id): Path<Uuid>, State(db): State<crate::app_state::AppState>) -> Json<Note> {
-    let _ = db;
+pub async fn get_by_id(Path(id): Path<Uuid>, State(state): State<crate::app_state::AppState>) -> Json<Note> {
+    let _ = state;
     Json(Note {
         id,
         title: "Placeholder note".to_string(),
