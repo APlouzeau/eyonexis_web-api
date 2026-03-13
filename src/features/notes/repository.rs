@@ -6,16 +6,25 @@ pub struct NotesRepository;
 
 impl NotesRepository {
     pub async fn list(pool: &MySqlPool) -> Result<Vec<Note>, AppError> {
-        // Le `Ok(...)` englobe notre résultat pour dire "Pas d'erreur ici"
-        // Le jour où on fera `sqlx::query!().fetch_all(pool).await?`, c'est le `?` qui renverra l'AppError en cas de crash
-        Ok(vec![])
+        let notes = sqlx::query_as!(
+            Note,
+            // Regarde le "as `id: uuid::Uuid`" ! 
+            // C'est ça qui dit à la Macro : "Parse ce varchar comme un vrai UUID natif"
+            r#"
+            SELECT id_note AS `id: uuid::Uuid`, title
+            FROM notes
+            "#,
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(notes)
     }
 
-    pub async fn create_note(pool: &MySqlPool, title: &str, content: &str) -> Result<String, AppError> {
-        let id_note = uuid::Uuid::new_v4().to_string(); // 'id_note' fait 36 char, top
+    pub async fn create_note(pool: &MySqlPool, title: &str) -> Result<Uuid, AppError> {
+        let id_note = uuid::Uuid::new_v4(); // 'id_note' fait 36 char, top
     
         // On hardcode (pour l'exercice) que c'est une note Rust (id venant de ton init.sql)
-        let lang_rust_id = "550e8400-e29b-41d4-a716-446655440004"; 
+        let lang_rust_id = uuid::Uuid::parse_str("550e...").unwrap(); 
 
         // ATTENTION: La macro va valider ça sur ton MariaDB !
         sqlx::query!(

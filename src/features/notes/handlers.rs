@@ -35,18 +35,21 @@ pub async fn get_by_id(Path(id): Path<Uuid>, State(state): State<crate::app_stat
     Json(Note {
         id,
         title: "Placeholder note".to_string(),
-        content: "Implement DB query in handlers/notes.rs".to_string(),
     })
 }
 
 pub async fn create(
-    State(db): State<crate::app_state::AppState>,
-    Json(payload): Json<CreateNotePayload>,
-) -> Json<Note> {
-    let _ = db;
-    Json(Note {
-        id: Uuid::new_v4(),
+    State(state): State<crate::app_state::AppState>, // On prend le global state
+    Json(payload): Json<CreateNotePayload>, // Axum extraie et valide automagiquement ton JSON
+) -> Result<Json<Note>, AppError> { // On n'oublie pas le Result !
+    
+    // Hop, on passe le pool DB, et les strings au Repo.
+    // Le `?` gère l'échec tout seul. Si succès, 'id' aura la valeur String générée
+    let id = NotesRepository::create_note(&state.db, &payload.title).await?;
+
+    // On renvoie un object propre en réponse au client !
+    Ok(Json(Note {
+        id: uuid::Uuid::parse_str(&id).unwrap(), // on re-parse la chaine en Uuid (temporaire pour compiler avec notre Note Model actuel)
         title: payload.title,
-        content: payload.content,
-    })
+    }))
 }
