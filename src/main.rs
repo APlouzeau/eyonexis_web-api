@@ -1,20 +1,5 @@
-
-async fn health() -> &'static str {
-    "OK"
-}
-
-async fn db_status(Extension(pool): Extension<MySqlPool>) -> &'static str {
-    // Tester la connexion avec une vraie requête
-    match sqlx::query("SELECT 1").fetch_one(&pool).await {
-        Ok(_) => "Database connection successful with a test query",
-        Err(_) => "Database connection failed",
-    }
-}
-
 mod db;
-mod routes;
-mod handlers;
-mod models;
+mod features;
 
 use axum::Extension;
 
@@ -28,8 +13,8 @@ async fn main() {
     
     // 2. Router global (compose tous les sous-routers)
     let app = 
-        routes::health::router()
-        .merge(routes::notes::router())  // ← Ajoute /notes/*
+        features::health::routes::router()
+        .merge(features::notes::routes::router())  // ← Ajoute /notes/*
         .layer(Extension(pool));
     
     // 3. Serveur
