@@ -1,7 +1,8 @@
 mod db;
 mod features;
+mod app_state;
 
-use axum::Extension;
+use app_state::AppState;
 
 #[tokio::main]
 async fn main() {
@@ -10,12 +11,14 @@ async fn main() {
         .await
         .expect("❌ Failed to connect to DB");
     println!("✅ Connected to DB");
+
+    let state = AppState { db: pool };
     
     // 2. Router global (compose tous les sous-routers)
     let app = 
         features::health::routes::router()
-        .merge(features::notes::routes::router())  // ← Ajoute /notes/*
-        .layer(Extension(pool));
+        .merge(features::notes::routes::router()  // ← Ajoute /notes/*
+        .with_state(state));  // ← Partage la DB avec les handlers;
     
     // 3. Serveur
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
