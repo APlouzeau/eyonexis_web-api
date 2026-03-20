@@ -81,19 +81,19 @@ CREATE TABLE IF NOT EXISTS note_categories(
 
 -- Données de test
 INSERT INTO languages (id_language, language_name, language_slug) VALUES
-('550e8400-5440001', 'JavaScript', 'javascript'),
-('550e8400-5440002', 'TypeScript', 'typescript'),
-('550e8400-5440003', 'Python', 'python'),
-('550e8400-5440004', 'Rust', 'rust'),
-('550e8400-5440005', 'React', 'react');
+(UNHEX(REPLACE('550e8400-5440-0000-0000-000000000001', '-', '')), 'JavaScript', 'javascript'),
+(UNHEX(REPLACE('550e8400-5440-0000-0000-000000000002', '-', '')), 'TypeScript', 'typescript'),
+(UNHEX(REPLACE('550e8400-5440-0000-0000-000000000003', '-', '')), 'Python', 'python'),
+(UNHEX(REPLACE('550e8400-5440-0000-0000-000000000004', '-', '')), 'Rust', 'rust'),
+(UNHEX(REPLACE('550e8400-5440-0000-0000-000000000005', '-', '')), 'React', 'react');
 
 INSERT INTO categories (id_category, category_name, category_slug) VALUES
-('650e8400-5440001', 'Fondamentaux', 'fondamentaux'),
-('650e8400-5440002', 'Design Patterns', 'design-patterns'),
-('650e8400-5440003', 'Algorithmes', 'algorithmes'),
-('650e8400-5440004', 'API & Web', 'api-web');
+(UNHEX(REPLACE('650e8400-5440-0000-0000-000000000001', '-', '')), 'Fondamentaux', 'fondamentaux'),
+(UNHEX(REPLACE('650e8400-5440-0000-0000-000000000002', '-', '')), 'Design Patterns', 'design-patterns'),
+(UNHEX(REPLACE('650e8400-5440-0000-0000-000000000003', '-', '')), 'Algorithmes', 'algorithmes'),
+(UNHEX(REPLACE('650e8400-5440-0000-0000-000000000004', '-', '')), 'API & Web', 'api-web');
 
 INSERT INTO tags (id_tag, tag_name, tag_slug) VALUES
-('750e8400-5440001', 'hooks', 'hooks'),
-('750e8400-5440002', 'performance', 'performance'),
-('750e8400-5440003', 'memoization', 'memoization');
+(UNHEX(REPLACE('750e8400-5440-0000-0000-000000000001', '-', '')), 'hooks', 'hooks'),
+(UNHEX(REPLACE('750e8400-5440-0000-0000-000000000002', '-', '')), 'performance', 'performance'),
+(UNHEX(REPLACE('750e8400-5440-0000-0000-000000000003', '-', '')), 'memoization', 'memoization');

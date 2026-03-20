@@ -16,7 +16,7 @@ use crate::error::AppError; // On importe notre super-erreur
 #[derive(Debug, Deserialize)]
 pub struct CreateNotePayload {
     pub title: String,
-    pub content: String,
+    pub body: String,
 }
 
 pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<Note>>, AppError> {
@@ -35,6 +35,9 @@ pub async fn get_by_id(Path(id): Path<Uuid>, State(state): State<crate::app_stat
     Json(Note {
         id,
         title: "Placeholder note".to_string(),
+        body: "Placeholder content".to_string(),
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
     })
 }
 
@@ -45,11 +48,14 @@ pub async fn create(
     
     // Hop, on passe le pool DB, et les strings au Repo.
     // Le `?` gère l'échec tout seul. Si succès, 'id' aura la valeur String générée
-    let id = NotesRepository::create_note(&state.db, &payload.title).await?;
+    let id = NotesRepository::create_note(&state.db, &payload.title, &payload.body).await?;
 
     // On renvoie un object propre en réponse au client !
     Ok(Json(Note {
-        id: uuid::Uuid::parse_str(&id).unwrap(), // on re-parse la chaine en Uuid (temporaire pour compiler avec notre Note Model actuel)
+        id,
         title: payload.title,
+        body: payload.body,
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
     }))
 }
