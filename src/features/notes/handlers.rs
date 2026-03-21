@@ -9,17 +9,28 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::features::notes::model::Note;
+use crate::features::notes::model::NoteList;
 use crate::features::notes::repository::NotesRepository;
+use crate::features::notes::model::NoteBlock;
 use crate::app_state::AppState;
 use crate::error::AppError; // On importe notre super-erreur
 
 #[derive(Debug, Deserialize)]
+pub struct CreateNoteBlockPayload {
+    pub block_type: String,
+    pub content: String,
+    pub order_index: i32,
+    pub metadata: Option<serde_json::Value>,
+}
+#[derive(Debug, Deserialize)]
 pub struct CreateNotePayload {
     pub title: String,
-    pub body: String,
+    pub subtitle: Option<String>,
+    pub id_language: Uuid,
+    pub blocks: Vec<CreateNoteBlockPayload>
 }
 
-pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<Note>>, AppError> {
+pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<NoteList>>, AppError> {
     
     // Le miracle est ici : le "?" à la fin !
     // Si `.list()` échoue, le "?" coupe court à la fonction, attrape l'AppError, la lance à Axum
@@ -34,8 +45,10 @@ pub async fn get_by_id(Path(id): Path<Uuid>, State(state): State<crate::app_stat
     let _ = state;
     Json(Note {
         id,
-        title: "Placeholder note".to_string(),
-        body: "Placeholder content".to_string(),
+        title: "Un test de lecture d'une note".to_string(),
+        subtitle: None,
+        id_language: Uuid::new_v4(),
+        blocks: vec![],
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
     })
@@ -43,18 +56,33 @@ pub async fn get_by_id(Path(id): Path<Uuid>, State(state): State<crate::app_stat
 
 pub async fn create(
     State(state): State<crate::app_state::AppState>, // On prend le global state
-    Json(payload): Json<CreateNotePayload>, // Axum extraie et valide automagiquement ton JSON
+    Json(create_note_payload): Json<CreateNotePayload>, // Axum extraie et valide automagiquement ton JSON
 ) -> Result<Json<Note>, AppError> { // On n'oublie pas le Result !
     
-    // Hop, on passe le pool DB, et les strings au Repo.
-    // Le `?` gère l'échec tout seul. Si succès, 'id' aura la valeur String générée
-    let id = NotesRepository::create_note(&state.db, &payload.title, &payload.body).await?;
+    // Hop, on passe le pool DB, et le payload au Repo.
+    let id = NotesRepository::create_note(&state.db, &create_note_payload).await?;
 
+    for block in &create_note_payload.blocks {
+        NotesRepository::create_note_block(&state.db, id, block).await?;
+    }
+
+    let mapped_blocks = create_note_payload.blocks.into_iter().map(|b| {
+        NoteBlock {
+            id_note_block: Uuid::new_v4(),
+            id_note: id,
+            block_type: b.block_type,
+            content: b.content,
+            order_index: b.order_index,
+            metadata: b.metadata,
+        }
+    }).collect(); // collect() rassemble tout dans un Vec<NoteBlock>
     // On renvoie un object propre en réponse au client !
     Ok(Json(Note {
         id,
-        title: payload.title,
-        body: payload.body,
+        title: create_note_payload.title,
+        subtitle: create_note_payload.subtitle,
+        id_language: create_note_payload.id_language,
+        blocks: mapped_blocks,
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
     }))

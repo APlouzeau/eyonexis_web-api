@@ -1,18 +1,18 @@
 use sqlx::MySqlPool;
 use uuid::Uuid;
-use crate::features::notes::model::Note;
+use crate::features::notes::model::NoteList;
+use crate::features::notes::handlers::CreateNotePayload;
+use crate::features::notes::handlers::CreateNoteBlockPayload;
 use crate::error::AppError; // On importe notre nouvelle super-erreur
 
 pub struct NotesRepository;
 
 impl NotesRepository {
-    pub async fn list(pool: &MySqlPool) -> Result<Vec<Note>, AppError> {
+    pub async fn list(pool: &MySqlPool) -> Result<Vec<NoteList>, AppError> {
         let notes = sqlx::query_as!(
-            Note,
-            // Regarde le "as `id: uuid::Uuid`" ! 
-            // C'est ça qui dit à la Macro : "Parse ce varchar comme un vrai UUID natif"
+            NoteList,
             r#"
-            SELECT id_note AS `id: uuid::Uuid`, title, '' AS body, created_at, updated_at
+            SELECT id_note AS `id: uuid::Uuid`, title, created_at, updated_at
             FROM notes
             "#,
         )
@@ -21,21 +21,20 @@ impl NotesRepository {
         Ok(notes)
     }
 
-    pub async fn create_note(pool: &MySqlPool, title: &str, _body: &str) -> Result<Uuid, AppError> {
+    pub async fn create_note(pool: &MySqlPool, create_note_payload: &CreateNotePayload) -> Result<Uuid, AppError> {
         let id_note = uuid::Uuid::new_v4(); // 'id_note' fait 36 char, top
-    
-        // On hardcode (pour l'exercice) que c'est une note Rust (id venant de ton init.sql)
-        let lang_rust_id = uuid::Uuid::parse_str("550e8400-5440-0000-0000-000000000004").unwrap(); 
 
         // ATTENTION: La macro va valider ça sur ton MariaDB !
+        // Si ta table `notes` prend un sous-titre optionnel, il faut l'ajouter (ici je suppose que `subtitle` n'est pas encore dans la table si elle est basique, mais on l'ajoute si nécessaire. Attend, dans init.sql, il y a un subtitle ? Non, je vais laisser title et id_language pour le moment)
         sqlx::query!(
             r#"
-            INSERT INTO notes (id_note, title, id_language)
-            VALUES (?, ?, ?)
+            INSERT INTO notes (id_note, title, subtitle, id_language)
+            VALUES (?, ?, ?, ?)
             "#,
             id_note,
-            title,
-            lang_rust_id
+            create_note_payload.title,
+            create_note_payload.subtitle,
+            create_note_payload.id_language
         )
         .execute(pool) 
         .await?;       
@@ -44,4 +43,24 @@ impl NotesRepository {
 
         Ok(id_note) 
     }
+
+    pub async fn create_note_block(pool: &MySqlPool, id_note: Uuid, block: &CreateNoteBlockPayload) -> Result<(), AppError> {
+         let id_note_block = uuid::Uuid::new_v4();
+        sqlx::query!(
+            r#"
+            INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_index, metadata)
+            VALUES (?, ?, ?, ?, ?, ?)
+            "#,
+            id_note_block,
+            id_note,
+            block.block_type,
+            block.content,
+            block.order_index,
+            block.metadata.as_ref().map(|m| m.to_string()) // Convertit le JSON en String pour la DB
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
 }
