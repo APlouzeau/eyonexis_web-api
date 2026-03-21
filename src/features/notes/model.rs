@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Note {
-	pub id: Uuid,
+	pub id_note: Uuid,
 	pub title: String,
     pub subtitle: Option<String>,
     pub id_language: Uuid,
@@ -28,6 +28,26 @@ pub struct NoteBlock {
 pub struct NoteList {
 	pub id: Uuid,
 	pub title: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NoteToShow {
+    pub id_note: Uuid,
+    pub title: String,
+    pub subtitle: Option<String>,
+    pub language: String,
+    pub blocks: Vec<NoteBlock>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+pub struct NoteSummary {
+    pub id_note: Uuid,
+    pub title: String,
+    pub subtitle: Option<String>,
+    pub language: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

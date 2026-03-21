@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 use crate::features::notes::model::Note;
 use crate::features::notes::model::NoteList;
+use crate::features::notes::model::NoteToShow;
 use crate::features::notes::repository::NotesRepository;
 use crate::features::notes::model::NoteBlock;
 use crate::app_state::AppState;
@@ -41,17 +42,12 @@ pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<NoteList>>, 
     Ok(Json(notes))
 }
 
-pub async fn get_by_id(Path(id): Path<Uuid>, State(state): State<crate::app_state::AppState>) -> Json<Note> {
-    let _ = state;
-    Json(Note {
-        id,
-        title: "Un test de lecture d'une note".to_string(),
-        subtitle: None,
-        id_language: Uuid::new_v4(),
-        blocks: vec![],
-        created_at: chrono::Utc::now(),
-        updated_at: chrono::Utc::now(),
-    })
+pub async fn get_by_id(
+    Path(id_note): Path<Uuid>,
+    State(state): State<AppState>
+) -> Result<Json<NoteToShow>, AppError> {
+    let _note = NotesRepository::get_note_by_id(&state.db, id_note).await?;
+    Ok(Json(_note))
 }
 
 pub async fn create(
@@ -61,10 +57,6 @@ pub async fn create(
     
     // Hop, on passe le pool DB, et le payload au Repo.
     let id = NotesRepository::create_note(&state.db, &create_note_payload).await?;
-
-    for block in &create_note_payload.blocks {
-        NotesRepository::create_note_block(&state.db, id, block).await?;
-    }
 
     let mapped_blocks = create_note_payload.blocks.into_iter().map(|b| {
         NoteBlock {
@@ -78,7 +70,7 @@ pub async fn create(
     }).collect(); // collect() rassemble tout dans un Vec<NoteBlock>
     // On renvoie un object propre en réponse au client !
     Ok(Json(Note {
-        id,
+        id_note: id,
         title: create_note_payload.title,
         subtitle: create_note_payload.subtitle,
         id_language: create_note_payload.id_language,
