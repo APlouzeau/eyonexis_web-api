@@ -1,4 +1,4 @@
 #[derive(Clone)]
 pub struct AppState {
-    pub db: sqlx::MySqlPool,
+    pub db: sqlx::postgres::PgPoolOptions,
 }

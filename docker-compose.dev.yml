@@ -2,38 +2,24 @@ name: eyonexis-dev
 
 services:
   db:
-    image: mariadb:10.6.24
+    image: postgres:17
     container_name: eyonexis-database-dev
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - ./db_data:/var/lib/mysql
+      - ./db_data:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d
     networks:
       - web
       - internal
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: eyonexis-phpmyadmin-dev
-    environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-    ports:
-      - "8081:80"
-    depends_on:
-      - db
-    networks:
-      - web
-      - internal
 volumes:
   db_data:
 

@@ -1,8 +1,6 @@
 use sqlx::Executor;
-use sqlx::MySqlPool;
+use sqlx::PgPool;
 use uuid::Uuid;
-use crate::features::notes::model::NoteSummary;
-use crate::features::notes::model::NoteBlock;
 use crate::features::notes::model::NoteList;
 use crate::features::notes::handlers::CreateNotePayload;
 use crate::features::notes::handlers::CreateNoteBlockPayload;
@@ -12,7 +10,7 @@ use crate::features::notes::model::NoteToShow; // On importe notre nouvelle supe
 pub struct NotesRepository;
 
 impl NotesRepository {
-    pub async fn list(pool: &MySqlPool) -> Result<Vec<NoteList>, AppError> {
+    pub async fn list(pool: &PgPool) -> Result<Vec<NoteList>, AppError> {
         let notes = sqlx::query_as!(
             NoteList,
             r#"
@@ -25,7 +23,7 @@ impl NotesRepository {
         Ok(notes)
     }
 
-    pub async fn create_note(pool: &MySqlPool, create_note_payload: &CreateNotePayload) -> Result<Uuid, AppError> {
+    pub async fn create_note(pool: &PgPool, create_note_payload: &CreateNotePayload) -> Result<Uuid, AppError> {
         let id_note = uuid::Uuid::new_v4(); // 'id_note' fait 36 char, top
         let mut tx = pool.begin().await?; // On démarre une transaction
 
@@ -54,7 +52,7 @@ impl NotesRepository {
         Ok(id_note) 
     }
 
-    async fn create_note_block(e: impl Executor<'_,Database = sqlx::MySql>, id_note: Uuid, block: &CreateNoteBlockPayload) -> Result<(), AppError> {
+    async fn create_note_block(e: impl Executor<'_,Database = sqlx::Postgres>, id_note: Uuid, block: &CreateNoteBlockPayload) -> Result<(), AppError> {
          let id_note_block = uuid::Uuid::new_v4();
         sqlx::query!(
             r#"
@@ -73,7 +71,7 @@ impl NotesRepository {
         Ok(())
     }
 
-    pub async fn get_note_by_id(pool: &MySqlPool, id_note: Uuid) -> Result<NoteToShow, AppError> {
+    pub async fn get_note_by_id(pool: &PgPool, id_note: Uuid) -> Result<NoteToShow, AppError> {
         let note = sqlx::query_as!(
             NoteSummary,
             r#"
