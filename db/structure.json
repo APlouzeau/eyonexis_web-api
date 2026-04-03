@@ -1,0 +1,53 @@
+{
+    "folders": [
+        {
+            "folders": [
+                { "id_note": "UUID PRIMARY KEY", "title": "VARCHAR(255) NOT NULL", "subtitle": "VARCHAR(500)" },
+                { "id_note": "UUID PRIMARY KEY", "title": "VARCHAR(255) NOT NULL", "subtitle": "VARCHAR(500)" },
+                {
+                    "id_note": "UUID PRIMARY KEY",
+                    "title": "VARCHAR(255) NOT NULL",
+                    "subtitle": "VARCHAR(500)"
+                }
+            ]
+        },
+        {
+            "folders": [
+                { "id_note": "UUID PRIMARY KEY", "title": "VARCHAR(255) NOT NULL", "subtitle": "VARCHAR(500)" },
+                { "id_note": "UUID PRIMARY KEY", "title": "VARCHAR(255) NOT NULL", "subtitle": "VARCHAR(500)" },
+                {
+                    "id_note": "UUID PRIMARY KEY",
+                    "title": "VARCHAR(255) NOT NULL",
+                    "subtitle": "VARCHAR(500)"
+                }
+            ]
+        },
+        {
+            "folders": [
+                {
+                    "folders": [
+                        {
+                            "folders": [
+                                {
+                                    "id_note": "UUID PRIMARY KEY",
+                                    "title": "VARCHAR(255) NOT NULL",
+                                    "subtitle": "VARCHAR(500)"
+                                },
+                                {
+                                    "id_note": "UUID PRIMARY KEY",
+                                    "title": "VARCHAR(255) NOT NULL",
+                                    "subtitle": "VARCHAR(500)"
+                                },
+                                {
+                                    "id_note": "UUID PRIMARY KEY",
+                                    "title": "VARCHAR(255) NOT NULL",
+                                    "subtitle": "VARCHAR(500)"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

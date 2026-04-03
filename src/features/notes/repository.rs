@@ -13,7 +13,7 @@ use crate::features::notes::model::NoteToShow; // On importe notre nouvelle supe
 pub struct NotesRepository;
 
 impl NotesRepository {
-    pub async fn list_notes(pool: &PgPool) -> Result<Vec<NoteList>, AppError> {
+    pub async fn list_notes(db: &PgPool) -> Result<Vec<NoteList>, AppError> {
         let notes = sqlx::query_as!(
             NoteList,
             r#"
@@ -21,14 +21,14 @@ impl NotesRepository {
             FROM notes
             "#,
         )
-        .fetch_all(pool)
+        .fetch_all(db)
         .await?;
         Ok(notes)
     }
 
-    pub async fn create_note(pool: &PgPool, create_note_payload: &CreateNotePayload) -> Result<Uuid, AppError> {
+    pub async fn create_note(db: &PgPool, create_note_payload: &CreateNotePayload) -> Result<Uuid, AppError> {
         let id_note = uuid::Uuid::new_v4(); // 'id_note' fait 36 char, top
-        let mut tx = pool.begin().await?; // On démarre une transaction
+        let mut tx = db.begin().await?; // On démarre une transaction
 
         // ATTENTION: La macro va valider ça sur ton MariaDB !
         // Si ta table `notes` prend un sous-titre optionnel, il faut l'ajouter (ici je suppose que `subtitle` n'est pas encore dans la table si elle est basique, mais on l'ajoute si nécessaire. Attend, dans init.sql, il y a un subtitle ? Non, je vais laisser title et id_language pour le moment)
@@ -74,7 +74,7 @@ impl NotesRepository {
         Ok(())
     }
 
-    pub async fn get_note_by_id(pool: &PgPool, id_note: Uuid) -> Result<NoteToShow, AppError> {
+    pub async fn get_note_by_id(db: &PgPool, id_note: Uuid) -> Result<NoteToShow, AppError> {
         let note = sqlx::query_as!(
             NoteSummary,
             r#"
@@ -85,7 +85,7 @@ impl NotesRepository {
             "#,
             id_note
         );
-        let note = match note.fetch_one(pool).await {
+        let note = match note.fetch_one(db).await {
             Ok(note) => note,
             Err(sqlx::Error::RowNotFound) => return Err(AppError::NotFound(format!("Note avec id {} non trouvée", id_note))),
             Err(e) => return Err(AppError::DatabaseError(e)),
@@ -101,7 +101,7 @@ impl NotesRepository {
             "#,
             id_note
         )
-        .fetch_all(pool)
+        .fetch_all(db)
         .await?;
 
         Ok(NoteToShow {

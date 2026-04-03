@@ -34,6 +34,7 @@ async fn main() {
     let app = 
         features::health::routes::router()
         .merge(features::notes::routes::router()  // ← Ajoute /notes/*
+        .merge(features::folders::routes::router()) // ← Ajoute /folders/*
         .with_state(state))
         .layer(cors);  // ← Partage la DB avec les handlers;
     
