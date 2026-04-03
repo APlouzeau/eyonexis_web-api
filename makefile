@@ -9,7 +9,7 @@ NC=\033[0m # No Color
 
 dev:
 	@echo "${BLUE}🟢 Démarrage de l'environnement de développement...${NC}"
-	@docker-compose -f docker-compose.dev.yml up -d
+	@docker compose -f docker-compose.dev.yml up -d
 	@echo ""
 	@echo "${GREEN}========================================================${NC}"
 	@echo "${GREEN}🚀 Environnement prêt !${NC}"

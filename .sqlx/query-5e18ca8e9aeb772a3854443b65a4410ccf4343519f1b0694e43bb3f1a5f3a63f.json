@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_index, metadata)\n            VALUES ($1, $2, $3, $4, $5, $6)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "block",
+            "kind": {
+              "Enum": [
+                "text",
+                "code",
+                "heading",
+                "note",
+                "list"
+              ]
+            }
+          }
+        },
+        "Text",
+        "Int4",
+        "Json"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5e18ca8e9aeb772a3854443b65a4410ccf4343519f1b0694e43bb3f1a5f3a63f"
+}

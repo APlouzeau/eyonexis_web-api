@@ -11,7 +11,7 @@ axum = "0.8.8"
 tokio = { version = "1", features = ["full"] }
 
 # Base de données (SQL pur avec vérification)
-sqlx = { version = "0.7", features = ["chrono", "postgres", "runtime-tokio", "uuid"] }
+sqlx = { version = "0.8.6", features = ["chrono", "postgres", "runtime-tokio", "uuid", "json"] }
 
 # JSON (sérialisation/désérialisation)
 serde = { version = "1", features = ["derive"] }

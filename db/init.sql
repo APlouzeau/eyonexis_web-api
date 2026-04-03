@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS folders(
    folder_name VARCHAR(50) NOT NULL UNIQUE,
    folder_slug VARCHAR(50) NOT NULL UNIQUE,
    parent_id UUID NULL,
-   created_at TIMESTAMP DEFAULT NOW(),
+   created_at TIMESTAMPTZ NOT NULL  DEFAULT NOW(),
    FOREIGN KEY(parent_id) REFERENCES folders(id_folder) ON DELETE CASCADE
 );
 
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS tags(
    id_tag UUID PRIMARY KEY,
    tag_name VARCHAR(50) NOT NULL UNIQUE,
    tag_slug VARCHAR(50) NOT NULL UNIQUE,
-   created_at TIMESTAMP DEFAULT NOW()
+   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Table principale des notes/articles
@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS notes(
    title VARCHAR(255) NOT NULL,
    subtitle VARCHAR(500),
    id_folder UUID NOT NULL,
-   created_at TIMESTAMP DEFAULT NOW(),
-   updated_at TIMESTAMP DEFAULT NOW(),
+   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
    FOREIGN KEY(id_folder) REFERENCES folders(id_folder)
 );
 
@@ -44,11 +44,11 @@ CREATE TABLE IF NOT EXISTS notes(
 CREATE TABLE IF NOT EXISTS notes_blocks(
    id_note_block UUID PRIMARY KEY,
    id_note UUID NOT NULL,
-   block_type block,
+   block_type block NOT NULL,
    content TEXT NOT NULL,
    order_index INT NOT NULL,
    metadata JSON,  -- Pour stocker le langage du code, niveau de heading, etc.
-   created_at TIMESTAMP DEFAULT NOW(),
+   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
    FOREIGN KEY(id_note) REFERENCES notes(id_note) ON DELETE CASCADE
 );
 

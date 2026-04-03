@@ -2,19 +2,22 @@ use sqlx::Executor;
 use sqlx::PgPool;
 use uuid::Uuid;
 use crate::features::notes::model::NoteList;
+use crate::features::notes::model::NoteSummary;
+use crate::features::notes::model::NoteBlock;
 use crate::features::notes::handlers::CreateNotePayload;
 use crate::features::notes::handlers::CreateNoteBlockPayload;
+use crate::features::notes::model::BlockType;
 use crate::error::AppError;
 use crate::features::notes::model::NoteToShow; // On importe notre nouvelle super-erreur
 
 pub struct NotesRepository;
 
 impl NotesRepository {
-    pub async fn list(pool: &PgPool) -> Result<Vec<NoteList>, AppError> {
+    pub async fn list_notes(pool: &PgPool) -> Result<Vec<NoteList>, AppError> {
         let notes = sqlx::query_as!(
             NoteList,
             r#"
-            SELECT id_note AS `id: uuid::Uuid`, title, created_at, updated_at
+            SELECT id_note AS "id: uuid::Uuid", title, created_at, updated_at
             FROM notes
             "#,
         )
@@ -31,13 +34,13 @@ impl NotesRepository {
         // Si ta table `notes` prend un sous-titre optionnel, il faut l'ajouter (ici je suppose que `subtitle` n'est pas encore dans la table si elle est basique, mais on l'ajoute si nécessaire. Attend, dans init.sql, il y a un subtitle ? Non, je vais laisser title et id_language pour le moment)
         sqlx::query!(
             r#"
-            INSERT INTO notes (id_note, title, subtitle, id_language)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO notes (id_note, title, subtitle, id_folder)
+            VALUES ($1, $2, $3, $4)
             "#,
             id_note,
             create_note_payload.title,
             create_note_payload.subtitle,
-            create_note_payload.id_language
+            create_note_payload.id_folder
         )
         .execute(&mut *tx)
         .await?;       
@@ -57,14 +60,14 @@ impl NotesRepository {
         sqlx::query!(
             r#"
             INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_index, metadata)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES ($1, $2, $3, $4, $5, $6)
             "#,
             id_note_block,
             id_note,
-            block.block_type,
+            block.block_type as BlockType, // Assure-toi que le type de block est correctement converti pour la DB
             block.content,
             block.order_index,
-            block.metadata.as_ref().map(|m| m.to_string()) // Convertit le JSON en String pour la DB
+            block.metadata.as_ref().map(|m| m) // Convertit le JSON en String pour la DB
         )
         .execute(e)
         .await?;
@@ -75,22 +78,25 @@ impl NotesRepository {
         let note = sqlx::query_as!(
             NoteSummary,
             r#"
-            SELECT n.id_note AS `id_note: uuid::Uuid`, n.title, n.subtitle, l.language_name AS language, n.created_at, n.updated_at
+            SELECT n.id_note AS "id_note: uuid::Uuid", n.title, n.subtitle, f.folder_name AS folder, n.created_at, n.updated_at
             FROM notes n
-            JOIN languages l ON n.id_language = l.id_language
-            WHERE n.id_note = ?
+            JOIN folders f ON n.id_folder = f.id_folder
+            WHERE n.id_note = $1
             "#,
             id_note
-        )
-        .fetch_one(pool)
-        .await?;
+        );
+        let note = match note.fetch_one(pool).await {
+            Ok(note) => note,
+            Err(sqlx::Error::RowNotFound) => return Err(AppError::NotFound(format!("Note avec id {} non trouvée", id_note))),
+            Err(e) => return Err(AppError::DatabaseError(e)),
+        };
 
         let blocks = sqlx::query_as!(
             NoteBlock,
             r#"
-            SELECT id_note_block AS `id_note_block: uuid::Uuid`, id_note AS `id_note: uuid::Uuid`, block_type, content, order_index, metadata AS `metadata: serde_json::Value`
+            SELECT id_note_block AS "id_note_block: uuid::Uuid", id_note AS "id_note: uuid::Uuid", block_type AS "block_type: BlockType", content, order_index, metadata AS "metadata: serde_json::Value"
             FROM notes_blocks
-            WHERE id_note = ?
+            WHERE id_note = $1
             ORDER BY order_index ASC
             "#,
             id_note
@@ -102,7 +108,7 @@ impl NotesRepository {
             id_note: note.id_note,
             title: note.title,
             subtitle: note.subtitle,
-            language: note.language,
+            folder: note.folder,
             blocks: blocks,
             created_at: note.created_at,
             updated_at: note.updated_at,

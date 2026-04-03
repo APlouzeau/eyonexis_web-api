@@ -11,6 +11,7 @@ use uuid::Uuid;
 use crate::features::notes::model::Note;
 use crate::features::notes::model::NoteList;
 use crate::features::notes::model::NoteToShow;
+use crate::features::notes::model::BlockType;
 use crate::features::notes::repository::NotesRepository;
 use crate::features::notes::model::NoteBlock;
 use crate::app_state::AppState;
@@ -18,7 +19,7 @@ use crate::error::AppError; // On importe notre super-erreur
 
 #[derive(Debug, Deserialize)]
 pub struct CreateNoteBlockPayload {
-    pub block_type: String,
+    pub block_type: BlockType,
     pub content: String,
     pub order_index: i32,
     pub metadata: Option<serde_json::Value>,
@@ -27,7 +28,7 @@ pub struct CreateNoteBlockPayload {
 pub struct CreateNotePayload {
     pub title: String,
     pub subtitle: Option<String>,
-    pub id_language: Uuid,
+    pub id_folder: Uuid,
     pub blocks: Vec<CreateNoteBlockPayload>
 }
 
@@ -37,7 +38,7 @@ pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<NoteList>>, 
     // Si `.list()` échoue, le "?" coupe court à la fonction, attrape l'AppError, la lance à Axum
     // Axum l'attrape, lit le `IntoResponse` qu'on a codé tout à l'heure, et crie "500 Internal Server Error" au client, tout seul !
     // Si tout se passe bien, on continue.
-    let notes = NotesRepository::list(&state.db).await?;
+    let notes = NotesRepository::list_notes(&state.db).await?;
     
     Ok(Json(notes))
 }
@@ -73,7 +74,7 @@ pub async fn create(
         id_note: id,
         title: create_note_payload.title,
         subtitle: create_note_payload.subtitle,
-        id_language: create_note_payload.id_language,
+        id_folder: create_note_payload.id_folder,
         blocks: mapped_blocks,
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),

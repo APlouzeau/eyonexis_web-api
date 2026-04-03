@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT n.id_note AS \"id_note: uuid::Uuid\", n.title, n.subtitle, f.folder_name AS folder, n.created_at, n.updated_at\n            FROM notes n\n            JOIN folders f ON n.id_folder = f.id_folder\n            WHERE n.id_note = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_note: uuid::Uuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "subtitle",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "folder",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3fb7a71322e3762ab123dc3c1f49c16991c15da455236856649dc422ea7d7744"
+}
