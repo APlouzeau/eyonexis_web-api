@@ -1,7 +1,7 @@
 use sqlx::Executor;
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::features::notes::model::NoteList;
+use crate::features::notes::model::NoteListComplete;
 use crate::features::notes::model::NoteSummary;
 use crate::features::notes::model::NoteBlock;
 use crate::features::notes::handlers::CreateNotePayload;
@@ -13,9 +13,9 @@ use crate::features::notes::model::NoteToShow; // On importe notre nouvelle supe
 pub struct NotesRepository;
 
 impl NotesRepository {
-    pub async fn list_notes(db: &PgPool) -> Result<Vec<NoteList>, AppError> {
+    pub async fn list_notes(db: &PgPool) -> Result<Vec<NoteListComplete>, AppError> {
         let notes = sqlx::query_as!(
-            NoteList,
+            NoteListComplete,
             r#"
             SELECT id_note AS "id: uuid::Uuid", title, created_at, updated_at
             FROM notes

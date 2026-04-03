@@ -9,7 +9,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::features::notes::model::Note;
-use crate::features::notes::model::NoteList;
+use crate::features::notes::model::NoteListComplete;
 use crate::features::notes::model::NoteToShow;
 use crate::features::notes::model::BlockType;
 use crate::features::notes::repository::NotesRepository;
@@ -32,7 +32,7 @@ pub struct CreateNotePayload {
     pub blocks: Vec<CreateNoteBlockPayload>
 }
 
-pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<NoteList>>, AppError> {
+pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<NoteListComplete>>, AppError> {
     
     // Le miracle est ici : le "?" à la fin !
     // Si `.list()` échoue, le "?" coupe court à la fonction, attrape l'AppError, la lance à Axum

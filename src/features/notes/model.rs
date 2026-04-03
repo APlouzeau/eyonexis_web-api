@@ -25,11 +25,18 @@ pub struct NoteBlock {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct NoteList {
+pub struct NoteListComplete {
 	pub id: Uuid,
 	pub title: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NoteListTree {
+    pub id: Uuid,
+    pub title: String,
+    pub folder_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
