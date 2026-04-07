@@ -58,6 +58,7 @@ pub async fn create(
     
     // Hop, on passe le pool DB, et le payload au Repo.
     let id = NotesRepository::create_note(&state.db, &create_note_payload).await?;
+    let slug = create_note_payload.title.to_lowercase().replace(" ", "-");
 
     let mapped_blocks = create_note_payload.blocks.into_iter().map(|b| {
         NoteBlock {
@@ -74,6 +75,7 @@ pub async fn create(
         id_note: id,
         title: create_note_payload.title,
         subtitle: create_note_payload.subtitle,
+        slug,
         id_folder: create_note_payload.id_folder,
         blocks: mapped_blocks,
         created_at: chrono::Utc::now(),

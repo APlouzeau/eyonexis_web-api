@@ -24,15 +24,16 @@ CREATE TABLE IF NOT EXISTS tags(
 -- Table principale des notes/articles
 CREATE TABLE IF NOT EXISTS notes(
    id_note UUID PRIMARY KEY,
-   title VARCHAR(255) NOT NULL,
-   subtitle VARCHAR(500),
-   id_folder UUID NOT NULL,
+   note_title VARCHAR(255) NOT NULL,
+   note_slug VARCHAR(255) NOT NULL UNIQUE,
+   note_subtitle VARCHAR(500),
+   note_id_folder UUID NOT NULL,
    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-   FOREIGN KEY(id_folder) REFERENCES folders(id_folder)
+   FOREIGN KEY(note_id_folder) REFERENCES folders(id_folder)
 );
 
-   CREATE INDEX idx_notes_folder ON notes (id_folder);
+   CREATE INDEX idx_notes_folder ON notes (note_id_folder);
    CREATE INDEX idx_notes_updated ON notes (updated_at DESC);
 
 -- Types de blocs possibles
@@ -106,10 +107,10 @@ INSERT INTO tags (id_tag, tag_name, tag_slug) VALUES
 ('750e8400-5440-0000-0000-000000000003', 'memoization', 'memoization');
 
 -- Notes de test
-INSERT INTO notes (id_note, title, subtitle, id_folder) VALUES
-('850e8400-5440-0000-0000-000000000001', 'Comprendre useState', 'Le hook fondamental pour gérer l''état local en React', '650e8400-5440-0000-0000-000000000005'),
-('850e8400-5440-0000-0000-000000000002', 'L''ownership en Rust', 'Le système de propriété qui garantit la sécurité mémoire sans GC', '650e8400-5440-0000-0000-000000000008'),
-('850e8400-5440-0000-0000-000000000003', 'Les closures en JavaScript', 'Comprendre la portée lexicale et les fermetures', '650e8400-5440-0000-0000-000000000007');
+INSERT INTO notes (id_note, title, subtitle, id_folder, note_slug) VALUES
+('850e8400-5440-0000-0000-000000000001', 'Comprendre useState', 'Le hook fondamental pour gérer l''état local en React', '650e8400-5440-0000-0000-000000000005', 'comprendre-usestate'),
+('850e8400-5440-0000-0000-000000000002', 'L''ownership en Rust', 'Le système de propriété qui garantit la sécurité mémoire sans GC', '650e8400-5440-0000-0000-000000000008', 'l-ownership-en-rust'),
+('850e8400-5440-0000-0000-000000000003', 'Les closures en JavaScript', 'Comprendre la portée lexicale et les fermetures', '650e8400-5440-0000-0000-000000000007', 'les-closures-en-javascript');
 
 -- Blocs de la note useState
 INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_index, metadata) VALUES

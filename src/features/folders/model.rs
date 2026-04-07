@@ -18,5 +18,6 @@ pub struct FolderRow {
     pub parent_id: Option<Uuid>,
     pub id_note: Option<Uuid>,
     pub note_title: Option<String>,
-    pub note_folder_id: Option<Uuid>,
+    pub note_id_folder: Uuid,
+    pub note_slug: Option<String>,
 }

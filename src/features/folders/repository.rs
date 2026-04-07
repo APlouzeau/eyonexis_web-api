@@ -16,9 +16,9 @@ impl FoldersRepository {
         let query_result :Vec<FolderRow> = sqlx::query_as!(
             FolderRow,
             r#"
-            SELECT f.id_folder, f.folder_name, f.parent_id, n.id_note as "id_note: uuid::Uuid", n.title as note_title, n.id_folder as note_folder_id
+            SELECT f.id_folder as "id_folder: uuid::Uuid", f.folder_name, f.parent_id, n.id_note as "id_note: uuid::Uuid", n.note_title, n.note_id_folder, n.note_slug
             FROM folders f
-            LEFT JOIN notes n ON f.id_folder = n.id_folder
+            LEFT JOIN notes n ON f.id_folder = n.note_id_folder
             "#
         )
         .fetch_all(db)
@@ -48,12 +48,13 @@ impl FoldersRepository {
     pub fn build_folder_notes(folder_id: Uuid, all_folders: &Vec<FolderRow>) -> Vec<NoteListTree> {
         all_folders
             .iter()
-            .filter(|n| n.id_folder == folder_id)
+            .filter(|n| n.note_id_folder == folder_id)
             .filter_map(|n| {
                 Some(NoteListTree {
                     id: n.id_note?,
-                    title: n.note_title.clone()?,
-                    folder_id: n.id_folder,
+                    note_title: n.note_title.clone()?,
+                    note_folder_id: n.note_id_folder,
+                    note_slug: n.note_slug.clone()?,
                 })
             })
             .collect()

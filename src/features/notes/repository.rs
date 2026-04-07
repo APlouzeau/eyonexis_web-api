@@ -2,8 +2,8 @@ use sqlx::Executor;
 use sqlx::PgPool;
 use uuid::Uuid;
 use crate::features::notes::model::NoteListComplete;
-use crate::features::notes::model::NoteSummary;
 use crate::features::notes::model::NoteBlock;
+use crate::features::notes::model::NoteSummary;
 use crate::features::notes::handlers::CreateNotePayload;
 use crate::features::notes::handlers::CreateNoteBlockPayload;
 use crate::features::notes::model::BlockType;
@@ -17,7 +17,7 @@ impl NotesRepository {
         let notes = sqlx::query_as!(
             NoteListComplete,
             r#"
-            SELECT id_note AS "id: uuid::Uuid", title, created_at, updated_at
+            SELECT id_note AS "id: uuid::Uuid", note_title, created_at, updated_at
             FROM notes
             "#,
         )
@@ -34,7 +34,7 @@ impl NotesRepository {
         // Si ta table `notes` prend un sous-titre optionnel, il faut l'ajouter (ici je suppose que `subtitle` n'est pas encore dans la table si elle est basique, mais on l'ajoute si nécessaire. Attend, dans init.sql, il y a un subtitle ? Non, je vais laisser title et id_language pour le moment)
         sqlx::query!(
             r#"
-            INSERT INTO notes (id_note, title, subtitle, id_folder)
+            INSERT INTO notes (id_note, note_title, note_subtitle, note_id_folder)
             VALUES ($1, $2, $3, $4)
             "#,
             id_note,
@@ -78,9 +78,9 @@ impl NotesRepository {
         let note = sqlx::query_as!(
             NoteSummary,
             r#"
-            SELECT n.id_note AS "id_note: uuid::Uuid", n.title, n.subtitle, f.folder_name AS folder, n.created_at, n.updated_at
+            SELECT n.id_note AS "id_note: uuid::Uuid", n.note_title, n.note_subtitle, f.folder_name AS folder, n.created_at, n.updated_at
             FROM notes n
-            JOIN folders f ON n.id_folder = f.id_folder
+            JOIN folders f ON n.note_id_folder = f.id_folder
             WHERE n.id_note = $1
             "#,
             id_note
@@ -106,8 +106,8 @@ impl NotesRepository {
 
         Ok(NoteToShow {
             id_note: note.id_note,
-            title: note.title,
-            subtitle: note.subtitle,
+            note_title: note.note_title,
+            note_subtitle: note.note_subtitle,
             folder: note.folder,
             blocks: blocks,
             created_at: note.created_at,

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT n.id_note AS \"id_note: uuid::Uuid\", n.title, n.subtitle, f.folder_name AS folder, n.created_at, n.updated_at\n            FROM notes n\n            JOIN folders f ON n.id_folder = f.id_folder\n            WHERE n.id_note = $1\n            ",
+  "query": "\n            SELECT n.id_note AS \"id_note: uuid::Uuid\", n.note_title, n.note_subtitle, f.folder_name AS folder, n.created_at, n.updated_at\n            FROM notes n\n            JOIN folders f ON n.note_id_folder = f.id_folder\n            WHERE n.id_note = $1\n            ",
   "describe": {
     "columns": [
       {
@@ -10,12 +10,12 @@
       },
       {
         "ordinal": 1,
-        "name": "title",
+        "name": "note_title",
         "type_info": "Varchar"
       },
       {
         "ordinal": 2,
-        "name": "subtitle",
+        "name": "note_subtitle",
         "type_info": "Varchar"
       },
       {
@@ -48,5 +48,5 @@
       false
     ]
   },
-  "hash": "3fb7a71322e3762ab123dc3c1f49c16991c15da455236856649dc422ea7d7744"
+  "hash": "00e6bd887b422a1fefe3dfc3b16154d911f3dc9cc45e49c48b5d9febe735c8a4"
 }

@@ -8,6 +8,7 @@ pub struct Note {
 	pub id_note: Uuid,
 	pub title: String,
     pub subtitle: Option<String>,
+    pub slug: String,
     pub id_folder: Uuid,
     pub blocks: Vec<NoteBlock>,
     pub created_at: DateTime<Utc>,
@@ -27,7 +28,7 @@ pub struct NoteBlock {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NoteListComplete {
 	pub id: Uuid,
-	pub title: String,
+	pub note_title: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -35,15 +36,16 @@ pub struct NoteListComplete {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NoteListTree {
     pub id: Uuid,
-    pub title: String,
-    pub folder_id: Uuid,
+    pub note_title: String,
+    pub note_slug: String,
+    pub note_folder_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NoteToShow {
     pub id_note: Uuid,
-    pub title: String,
-    pub subtitle: Option<String>,
+    pub note_title: String,
+    pub note_subtitle: Option<String>,
     pub folder: String,
     pub blocks: Vec<NoteBlock>,
     pub created_at: DateTime<Utc>,
@@ -52,8 +54,8 @@ pub struct NoteToShow {
 
 pub struct NoteSummary {
     pub id_note: Uuid,
-    pub title: String,
-    pub subtitle: Option<String>,
+    pub note_title: String,
+    pub note_subtitle: Option<String>,
     pub folder: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,

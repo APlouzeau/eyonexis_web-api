@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id_note AS \"id: uuid::Uuid\", title, created_at, updated_at\n            FROM notes\n            ",
+  "query": "\n            SELECT id_note AS \"id: uuid::Uuid\", note_title, created_at, updated_at\n            FROM notes\n            ",
   "describe": {
     "columns": [
       {
@@ -10,7 +10,7 @@
       },
       {
         "ordinal": 1,
-        "name": "title",
+        "name": "note_title",
         "type_info": "Varchar"
       },
       {
@@ -34,5 +34,5 @@
       false
     ]
   },
-  "hash": "118a7254d0a35a754b2c6886360bcc565a0bae50cf4eb68e7ea0a0f53abc7471"
+  "hash": "c5194c27c077b92b1e6f0de0345d0e603330c6b63bb46da9e313f359d2934713"
 }
