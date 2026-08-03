@@ -1,48 +1,54 @@
-mod db;
-mod features;
-mod app_state;
-mod error;
-
-use app_state::AppState;
+use axum::Router;
+use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
-use axum::http::HeaderValue;
+
+mod db;
+mod error;
+mod features;
+
+#[derive(Clone)]
+pub struct AppState {
+    // AUTO-GENERATED-SERVICE
+}
 
 #[tokio::main]
 async fn main() {
-    // 1. DB
-    let pool = db::connect()
+    tracing_subscriber::fmt::init();
+    dotenvy::dotenv().ok();
+    let database_url = format!(
+        "postgresql://{}:{}@{}:{}/{}",
+        std::env::var("DB_USER").expect("DB_USER must be set"),
+        std::env::var("DB_PSWD").expect("DB_PSWD must be set"),
+        std::env::var("DB_URL").expect("DB_URL must be set"),
+        std::env::var("DB_PORT").expect("DB_PORT must be set"),
+        std::env::var("DB_NAME").expect("DB_NAME must be set")
+    );
+    let pool = db::create_pool(&database_url)
         .await
-        .expect("❌ Failed to connect to DB");
-    println!("✅ Connected to DB");
+        .expect("Failed to create database pool");
 
-    let state = AppState { db: pool };
-
-     // 2. Configuration du CORS
-    let frontend_urls = std::env::var("FRONTEND_URLS")
-        .unwrap_or_default();
-    let allowed_origins: Vec<HeaderValue> = frontend_urls
-        .split(',')
-        .filter_map(|url| url.trim().parse::<HeaderValue>().ok())
-        .collect();
+    let state = AppState {
+        // AUTO-GENERATED-STATE
+        note_service: NoteService {
+            repository: PostgresNoteRepository { pool: pool.clone() },
+        },
+    };
 
     let cors = CorsLayer::new()
-        .allow_origin(allowed_origins)
+        .allow_origin(
+            std::env::var("URL_CORS")
+                .unwrap_or_else(|_| "http://localhost:3000".to_string())
+                .parse::<axum::http::HeaderValue>()
+                .unwrap(),
+        )
         .allow_methods(Any)
         .allow_headers(Any);
-    
-    // 3. Router global (compose tous les sous-routers)
-    let app = 
-        features::health::routes::router()
-        .merge(features::notes::routes::router()  // ← Ajoute /notes/*
-        .merge(features::folders::routes::router()) // ← Ajoute /folders/*
-        .with_state(state))
-        .layer(cors);  // ← Partage la DB avec les handlers;
-    
-    // 4. Serveur
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
-        .await
-        .unwrap();
-    
-    println!("🚀 Server on http://localhost:3000");
+
+    let app = Router::new()
+        // AUTO-GENERATED-ROUTES
+        .nest("/api", note_router::routes())
+        .layer(cors)
+        .with_state(state);
+    let listener = TcpListener::bind("0.0.0.0:3001").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }

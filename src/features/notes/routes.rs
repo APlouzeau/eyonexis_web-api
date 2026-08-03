@@ -1,13 +1,16 @@
-// Juste le MAPPING route → handler
+use crate::features::notes::handler;
 use axum::{
+    routing::{delete, get, post},
     Router,
-    routing::{get, post},
 };
-use crate::features::notes::handlers;
 
-pub fn router() -> Router<crate::app_state::AppState> {
+use crate::AppState;
+
+use super::handler;
+
+pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/notes", get(handlers::list))
-        .route("/note/{id_note}", get(handlers::get_by_id))
-        .route("/create-notes", post(handlers::create))
+        .route("/notes", get(handler::get_all))
+        .route("/note/{id_note}", get(handler::get_by_id))
+        .route("/create-notes", post(handler::create))
 }

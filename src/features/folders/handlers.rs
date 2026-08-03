@@ -6,7 +6,7 @@ use axum::{
 
 use crate::features::folders::model::FolderTree;
 use crate::features::folders::repository::FoldersRepository;
-use crate::app_state::AppState;
+use crate::db::AppState;
 
 pub async fn get_folder_tree(
     State(state): State<AppState>,
