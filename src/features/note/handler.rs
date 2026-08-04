@@ -6,9 +6,9 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::AppState;
 
-use crate::features::notes::model::{BlockType, Note, NoteBlock, NoteToShow};
-use crate::features::notes::model_response::NoteListTreeResponse;
-use crate::features::notes::repository::NoteRepository;
+use crate::features::note::model::{BlockType, Note, NoteBlock, NoteToShow};
+use crate::features::note::model_response::NoteListTreeResponse;
+use crate::features::note::repository::NoteRepository;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateNoteBlockPayload {

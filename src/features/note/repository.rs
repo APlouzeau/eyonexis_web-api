@@ -1,8 +1,8 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::features::notes::model::{NewNote, Note, NoteToList};
-use crate::features::notes::model_joined::NoteDetail;
+use crate::features::note::model::{NewNote, Note, NoteToList};
+use crate::features::note::model_joined::NoteDetail;
 
 #[derive(Clone)]
 pub struct PostgresNoteRepository {

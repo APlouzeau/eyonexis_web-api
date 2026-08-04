@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
 
-use crate::features::notes::model::NoteListTree;
+use crate::features::note::model::NoteListTree;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FolderTree {
