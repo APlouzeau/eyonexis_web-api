@@ -2,11 +2,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Note {
-	pub id_note: Uuid,
-	pub title: String,
+    pub id_note: Uuid,
+    pub title: String,
     pub subtitle: Option<String>,
     pub slug: String,
     pub id_folder: Uuid,
@@ -15,30 +14,38 @@ pub struct Note {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewNote {
+    pub title: String,
+    pub subtitle: Option<String>,
+    pub slug: String,
+    pub id_folder: Uuid,
+    pub blocks: Vec<NoteBlock>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteNote {
+    pub id_note: Uuid,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NoteBlock {
     pub id_note_block: Uuid,
     pub id_note: Uuid,
     pub block_type: BlockType,
     pub content: String,
-    pub order_index: i32,
+    pub order_index: u32,
     pub metadata: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct NoteListComplete {
-	pub id: Uuid,
-	pub note_title: String,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct NoteListTree {
+pub struct NoteToList {
     pub id: Uuid,
-    pub note_title: String,
-    pub note_slug: String,
-    pub note_folder_id: Uuid,
+    pub title: String,
+    pub subtitle: Option<String>,
+    pub id_folder: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

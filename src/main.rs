@@ -2,6 +2,10 @@ use axum::Router;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 
+use crate::features::notes::repository::PostgresNoteRepository;
+use crate::features::notes::routes as note_router;
+use crate::features::notes::service::NoteService;
+
 mod db;
 mod error;
 mod features;
@@ -9,6 +13,7 @@ mod features;
 #[derive(Clone)]
 pub struct AppState {
     // AUTO-GENERATED-SERVICE
+    pub note_service: NoteService<PostgresNoteRepository>,
 }
 
 #[tokio::main]

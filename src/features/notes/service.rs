@@ -1,5 +1,5 @@
 use super::model::{DeleteNote, NewNote};
-use super::model_response::NoteResponse;
+use super::model_response::NoteToListResponse;
 use super::repository::NoteRepository;
 
 #[derive(Clone)]
@@ -8,9 +8,9 @@ pub struct NoteService<R: NoteRepository> {
 }
 
 impl<R: NoteRepository> NoteService<R> {
-    pub async fn get_all(&self) -> Result<Vec<NoteResponse>, sqlx::Error> {
-        let notes = self.repository.get_all().await?;
-        Ok(notes.into_iter().map(NoteResponse::from).collect())
+    pub async fn list(&self) -> Result<Vec<NoteToListResponse>, sqlx::Error> {
+        let notes = self.repository.list().await?;
+        Ok(notes.into_iter().map(NoteToListResponse::from).collect())
     }
 
     pub async fn create(&self, new_note: NewNote) -> Result<Vec<NoteResponse>, sqlx::Error> {

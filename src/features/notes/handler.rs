@@ -4,13 +4,11 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::error::AppError;
-use crate::features::notes::model::BlockType;
-use crate::features::notes::model::Note;
-use crate::features::notes::model::NoteBlock;
-use crate::features::notes::model::NoteListComplete;
-use crate::features::notes::model::NoteToShow;
-use crate::features::notes::repository::NotesRepository;
-use crate::AppState; // On importe notre super-erreur
+use crate::AppState;
+
+use crate::features::notes::model::{BlockType, Note, NoteBlock, NoteToShow};
+use crate::features::notes::model_response::NoteListTreeResponse;
+use crate::features::notes::repository::NoteRepository;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateNoteBlockPayload {
@@ -27,12 +25,10 @@ pub struct CreateNotePayload {
     pub blocks: Vec<CreateNoteBlockPayload>,
 }
 
-pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<NoteListComplete>>, AppError> {
-    // Le miracle est ici : le "?" à la fin !
-    // Si `.list()` échoue, le "?" coupe court à la fonction, attrape l'AppError, la lance à Axum
-    // Axum l'attrape, lit le `IntoResponse` qu'on a codé tout à l'heure, et crie "500 Internal Server Error" au client, tout seul !
-    // Si tout se passe bien, on continue.
-    let notes = NotesRepository::list_notes(&state.db).await?;
+pub async fn list(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<NoteListTreeResponse>>, AppError> {
+    let notes = state.note_service.list().await?;
 
     Ok(Json(notes))
 }
@@ -41,7 +37,7 @@ pub async fn get_by_id(
     Path(id_note): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<Json<NoteToShow>, AppError> {
-    let _note = NotesRepository::get_note_by_id(&state.db, id_note).await?;
+    let _note = NoteRepository::get_note_by_id(&state.db, id_note).await?;
     Ok(Json(_note))
 }
 
