@@ -7,7 +7,6 @@ use crate::error::AppError;
 use crate::AppState;
 
 use crate::features::note::model::{BlockType, Note, NoteBlock, NoteToShow};
-use crate::features::note::model_response::NoteListTreeResponse;
 use crate::features::note::repository::NoteRepository;
 
 #[derive(Debug, Deserialize)]
@@ -25,7 +24,7 @@ pub struct CreateNotePayload {
     pub blocks: Vec<CreateNoteBlockPayload>,
 }
 
-pub async fn list(
+pub async fn get_all(
     State(state): State<AppState>,
 ) -> Result<Json<Vec<NoteListTreeResponse>>, AppError> {
     let notes = state.note_service.list().await?;
@@ -33,7 +32,7 @@ pub async fn list(
     Ok(Json(notes))
 }
 
-pub async fn get_by_id(
+/* pub async fn get_by_id(
     Path(id_note): Path<Uuid>,
     State(state): State<AppState>,
 ) -> Result<Json<NoteToShow>, AppError> {
@@ -48,7 +47,7 @@ pub async fn create(
     // On n'oublie pas le Result !
 
     // Hop, on passe le pool DB, et le payload au Repo.
-    let id = NotesRepository::create_note(&state.db, &create_note_payload).await?;
+    let id = NoteRepository::create_note(&state.db, &create_note_payload).await?;
     let slug = create_note_payload.title.to_lowercase().replace(" ", "-");
 
     let mapped_blocks = create_note_payload
@@ -74,4 +73,4 @@ pub async fn create(
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
     }))
-}
+}*/

@@ -1,4 +1,3 @@
-use super::model::{DeleteNote, NewNote};
 use super::model_response::NoteToListResponse;
 use super::repository::NoteRepository;
 
@@ -13,7 +12,7 @@ impl<R: NoteRepository> NoteService<R> {
         Ok(notes.into_iter().map(NoteToListResponse::from).collect())
     }
 
-    pub async fn create(&self, new_note: NewNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
+    /*     pub async fn create(&self, new_note: NewNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
         self.repository.create(new_note).await?;
         self.get_all().await
     }
@@ -21,5 +20,5 @@ impl<R: NoteRepository> NoteService<R> {
     pub async fn delete(&self, id: DeleteNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
         self.repository.delete(id).await?;
         self.get_all().await
-    }
+    } */
 }
