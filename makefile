@@ -15,8 +15,8 @@ dev:
 	@echo "${GREEN}🚀 Environnement prêt !${NC}"
 	@echo "${GREEN}========================================================${NC}"
 	@echo "⚙️  API DB Port  : ${YELLOW}5432${NC}"
-	@echo "🦀 Rust Server  : http://localhost:3000"
-	@echo "🩺 Health Check : http://localhost:3000/health"
+	@echo "🦀 Rust Server  : http://localhost:3001/api"
+	@echo "🩺 Health Check : http://localhost:3001/api/health"
 	@echo "${GREEN}========================================================${NC}"
 	@echo "Astuce: N'oublie pas de lancer 'cargo run' dans un autre terminal pour l'API"
 

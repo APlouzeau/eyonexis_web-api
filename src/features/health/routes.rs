@@ -1,7 +1,8 @@
-use axum::{Router, routing::get};
-use crate::features::health::handlers::health;
+use super::handler;
+use axum::{routing::get, Router};
 
-pub fn router() -> Router {
-    Router::new()
-        .route("/health", get(health))
+use crate::AppState;
+
+pub fn routes() -> Router<AppState> {
+    Router::new().route("/health", get(handler::health))
 }

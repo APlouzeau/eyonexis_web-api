@@ -27,7 +27,7 @@ impl NoteRepository for PostgresNoteRepository {
         }
     }
 
-    fn create(
+    /*  fn create(
         &self,
         new_note: NewNote,
     ) -> impl std::future::Future<Output = Result<Note, sqlx::Error>> + Send {
@@ -52,7 +52,7 @@ impl NoteRepository for PostgresNoteRepository {
 
             Ok(note)
         }
-    }
+    } */
 
     /*     async fn create_note_block(
         e: impl Executor<'_, Database = sqlx::Postgres>,
@@ -128,11 +128,11 @@ pub trait NoteRepository {
     fn list(
         &self,
     ) -> impl std::future::Future<Output = Result<Vec<NoteToList>, sqlx::Error>> + Send;
-    fn create(
+    /*fn create(
         &self,
         new_note: NewNote,
     ) -> impl std::future::Future<Output = Result<Vec<NoteDetail>, sqlx::Error>> + Send;
-    /* fn delete(
+     fn delete(
         &self,
         note: DeleteNote,
     ) -> impl std::future::Future<Output = Result<Vec<NoteDetail>, sqlx::Error>> + Send; */

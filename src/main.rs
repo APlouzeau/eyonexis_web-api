@@ -7,8 +7,10 @@ use crate::features::note::routes as note_router;
 use crate::features::note::service::NoteService;
 
 use crate::features::folder::repository::PostgresFolderRepository;
-use crate::features::folder::routes as note_router;
+use crate::features::folder::routes as folder_router;
 use crate::features::folder::service::FolderService;
+
+use crate::features::health::routes as health_router;
 
 mod db;
 mod error;
@@ -33,6 +35,7 @@ async fn main() {
         std::env::var("DB_PORT").expect("DB_PORT must be set"),
         std::env::var("DB_NAME").expect("DB_NAME must be set")
     );
+    println!("DB URL = {}", database_url);
     let pool = db::create_pool(&database_url)
         .await
         .expect("Failed to create database pool");
@@ -42,7 +45,7 @@ async fn main() {
         note_service: NoteService {
             repository: PostgresNoteRepository { pool: pool.clone() },
         },
-        folder_service: NoteService {
+        folder_service: FolderService {
             repository: PostgresFolderRepository { pool: pool.clone() },
         },
     };
@@ -59,7 +62,9 @@ async fn main() {
 
     let app = Router::new()
         // AUTO-GENERATED-ROUTES
+        .nest("/api", folder_router::routes())
         .nest("/api", note_router::routes())
+        .nest("/api", health_router::routes())
         .layer(cors)
         .with_state(state);
     let listener = TcpListener::bind("0.0.0.0:3001").await.unwrap();

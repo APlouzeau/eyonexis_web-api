@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use super::model::FolderTree;
+use super::model::FolderBranch;
 
 #[derive(Clone)]
 pub struct PostgresFolderRepository {
@@ -8,11 +8,11 @@ pub struct PostgresFolderRepository {
 }
 
 impl FolderRepository for PostgresFolderRepository {
-    async fn get_folder_tree(&self) -> Result<Vec<FolderTree>, sqlx::Error> {
+    async fn get_folder_tree(&self) -> Result<Vec<FolderBranch>, sqlx::Error> {
         let result = sqlx::query_as!(
-            FolderRow,
+            FolderBranch,
             r#"
-            SELECT f.id_folder as "id_folder: uuid::Uuid", f.folder_name, f.children as "children: uuid::Uuid"
+            SELECT f.id_folder as "id_folder: uuid::Uuid", f.folder_name, f.parent_id as "parent_id: uuid::Uuid"
             FROM folders f
             "#
         )
@@ -26,5 +26,5 @@ impl FolderRepository for PostgresFolderRepository {
 pub trait FolderRepository {
     fn get_folder_tree(
         &self,
-    ) -> impl std::future::Future<Output = Result<Vec<FolderTree>, sqlx::Error>> + Send;
+    ) -> impl std::future::Future<Output = Result<Vec<FolderBranch>, sqlx::Error>> + Send;
 }

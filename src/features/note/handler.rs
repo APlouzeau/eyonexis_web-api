@@ -1,3 +1,4 @@
+use crate::features::note::model::NoteToList;
 use axum::{extract::Path, extract::State, Json};
 
 use serde::Deserialize;
@@ -24,9 +25,7 @@ pub struct CreateNotePayload {
     pub blocks: Vec<CreateNoteBlockPayload>,
 }
 
-pub async fn get_all(
-    State(state): State<AppState>,
-) -> Result<Json<Vec<NoteListTreeResponse>>, AppError> {
+pub async fn get_all(State(state): State<AppState>) -> Result<Json<Vec<NoteToList>>, AppError> {
     let notes = state.note_service.list().await?;
 
     Ok(Json(notes))

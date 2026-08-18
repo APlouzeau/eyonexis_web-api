@@ -1,3 +1,5 @@
+use crate::features::note::model::NoteToList;
+
 use super::model_response::NoteToListResponse;
 use super::repository::NoteRepository;
 
@@ -7,9 +9,9 @@ pub struct NoteService<R: NoteRepository> {
 }
 
 impl<R: NoteRepository> NoteService<R> {
-    pub async fn list(&self) -> Result<Vec<NoteToListResponse>, sqlx::Error> {
+    pub async fn list(&self) -> Result<Vec<NoteToList>, sqlx::Error> {
         let notes = self.repository.list().await?;
-        Ok(notes.into_iter().map(NoteToListResponse::from).collect())
+        Ok(notes.into_iter().map(NoteToList::from).collect())
     }
 
     /*     pub async fn create(&self, new_note: NewNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
