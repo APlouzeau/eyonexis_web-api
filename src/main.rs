@@ -53,7 +53,7 @@ async fn main() {
     let cors = CorsLayer::new()
         .allow_origin(
             std::env::var("URL_CORS")
-                .unwrap_or_else(|_| "http://localhost:3000".to_string())
+                .unwrap_or_else(|_| "http://localhost:4200".to_string())
                 .parse::<axum::http::HeaderValue>()
                 .unwrap(),
         )
