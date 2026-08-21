@@ -1,6 +1,7 @@
+use axum::http::HeaderValue;
 use axum::Router;
 use tokio::net::TcpListener;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
 use crate::features::note::repository::PostgresNoteRepository;
 use crate::features::note::routes as note_router;
@@ -40,23 +41,31 @@ async fn main() {
         .await
         .expect("Failed to create database pool");
 
-    let state = AppState {
-        // AUTO-GENERATED-STATE
-        note_service: NoteService {
-            repository: PostgresNoteRepository { pool: pool.clone() },
-        },
-        folder_service: FolderService {
-            repository: PostgresFolderRepository { pool: pool.clone() },
-        },
+    let note_service = NoteService {
+        repository: PostgresNoteRepository { pool: pool.clone() },
     };
 
+    let folder_service = FolderService {
+        repository: PostgresFolderRepository { pool: pool.clone() },
+        note_service: note_service.clone(),
+    };
+
+    let state = AppState {
+        // AUTO-GENERATED-STATE
+        note_service: note_service,
+        folder_service: folder_service,
+    };
+
+    let origins: Vec<HeaderValue> = std::env::var("URL_CORS")
+        .unwrap_or_else(|_| "http://localhost:4200".to_string())
+        .split(',')
+        .filter_map(|s| s.trim().parse::<HeaderValue>().ok())
+        .collect();
+
+    println!("{:?}", origins);
+
     let cors = CorsLayer::new()
-        .allow_origin(
-            std::env::var("URL_CORS")
-                .unwrap_or_else(|_| "http://localhost:4200".to_string())
-                .parse::<axum::http::HeaderValue>()
-                .unwrap(),
-        )
+        .allow_origin(AllowOrigin::list(origins))
         .allow_methods(Any)
         .allow_headers(Any);
 

@@ -24,7 +24,7 @@ down:
 	@echo "${RED}🔴 Arrêt de l'environnement Docker...${NC}"
 	@docker-compose -f docker-compose.dev.yml down
 
-reset-db: down
+db-reset: down
 	@echo "${YELLOW}⚠️  Réinitialisation totale de la base de données...${NC}"
 	@echo "🗑️  Suppression du volume local db_data (un mot de passe sudo peut être demandé)..."
 	@sudo rm -rf ./db_data
