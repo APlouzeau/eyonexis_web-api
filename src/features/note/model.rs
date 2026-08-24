@@ -36,7 +36,7 @@ pub struct NoteBlock {
     pub id_note: Uuid,
     pub block_type: BlockType,
     pub content: String,
-    pub order_index: u32,
+    pub order_index: i32,
     pub metadata: Option<serde_json::Value>,
 }
 
@@ -50,9 +50,10 @@ pub struct NoteToList {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NoteToShow {
     pub id_note: Uuid,
-    pub note_title: String,
-    pub note_subtitle: Option<String>,
+    pub title: String,
+    pub subtitle: Option<String>,
     pub folder: String,
+    pub slug: String,
     pub blocks: Vec<NoteBlock>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -60,9 +61,10 @@ pub struct NoteToShow {
 
 pub struct NoteSummary {
     pub id_note: Uuid,
-    pub note_title: String,
-    pub note_subtitle: Option<String>,
+    pub title: String,
+    pub subtitle: Option<String>,
     pub folder: String,
+    pub slug: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::features::note::model::NoteToList;
+use crate::features::note::model::{NoteBlock, NoteSummary, NoteToList, NoteToShow, BlockType};
 
 #[derive(Clone)]
 pub struct PostgresNoteRepository {
@@ -26,6 +26,51 @@ impl NoteRepository for PostgresNoteRepository {
             .fetch_all(&self.pool)
             .await?;
             Ok(notes)
+        }
+    }
+
+    fn get_note_by_id(
+        &self,
+        id_note: Uuid,
+    ) -> impl std::future::Future<Output = Result<NoteToShow, sqlx::Error>> + Send {
+        async move {
+            let note = sqlx::query_as!(
+                NoteSummary,
+                r#"
+            SELECT n.id_note AS "id_note: uuid::Uuid", n.title, n.subtitle, n.created_at, n.updated_at, f.folder_name as folder, n.slug
+            FROM notes n
+            INNER JOIN folders f ON n.id_folder = f.id_folder
+            WHERE n.id_note = $1
+            "#,
+                id_note
+            )            
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(sqlx::Error::RowNotFound)?;
+
+            let blocks = sqlx::query_as!(
+            NoteBlock,
+            r#"
+            SELECT id_note_block AS "id_note_block: uuid::Uuid", id_note AS "id_note: uuid::Uuid", block_type AS "block_type: BlockType", content, order_index, metadata AS "metadata: serde_json::Value"
+            FROM notes_blocks
+            WHERE id_note = $1
+            ORDER BY order_index ASC
+            "#,
+            id_note
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+            Ok(NoteToShow {
+                id_note: note.id_note,
+                title: note.title,
+                subtitle: note.subtitle,
+                folder: note.folder,
+                slug : note.slug,
+                blocks: blocks,
+                created_at: note.created_at,
+                updated_at: note.updated_at,
+            })
         }
     }
 
@@ -77,52 +122,6 @@ impl NoteRepository for PostgresNoteRepository {
         .execute(e)
         .await?;
         Ok(())
-    }
-
-    pub async fn get_note_by_id(db: &PgPool, id_note: Uuid) -> Result<NoteToShow, AppError> {
-        let note = sqlx::query_as!(
-            NoteSummary,
-            r#"
-            SELECT n.id_note AS "id_note: uuid::Uuid", n.note_title, n.note_subtitle, f.folder_name AS folder, n.created_at, n.updated_at
-            FROM notes n
-            JOIN folders f ON n.note_id_folder = f.id_folder
-            WHERE n.id_note = $1
-            "#,
-            id_note
-        );
-        let note = match note.fetch_one(db).await {
-            Ok(note) => note,
-            Err(sqlx::Error::RowNotFound) => {
-                return Err(AppError::NotFound(format!(
-                    "Note avec id {} non trouvée",
-                    id_note
-                )))
-            }
-            Err(e) => return Err(AppError::DatabaseError(e)),
-        };
-
-        let blocks = sqlx::query_as!(
-            NoteBlock,
-            r#"
-            SELECT id_note_block AS "id_note_block: uuid::Uuid", id_note AS "id_note: uuid::Uuid", block_type AS "block_type: BlockType", content, order_index, metadata AS "metadata: serde_json::Value"
-            FROM notes_blocks
-            WHERE id_note = $1
-            ORDER BY order_index ASC
-            "#,
-            id_note
-        )
-        .fetch_all(db)
-        .await?;
-
-        Ok(NoteToShow {
-            id_note: note.id_note,
-            note_title: note.note_title,
-            note_subtitle: note.note_subtitle,
-            folder: note.folder,
-            blocks: blocks,
-            created_at: note.created_at,
-            updated_at: note.updated_at,
-        })
     } */
 }
 
@@ -131,6 +130,10 @@ pub trait NoteRepository {
         &self,
         id_folder: Uuid,
     ) -> impl std::future::Future<Output = Result<Vec<NoteToList>, sqlx::Error>> + Send;
+    fn get_note_by_id(
+        &self,
+        id_note: Uuid,
+    ) -> impl std::future::Future<Output = Result<NoteToShow, sqlx::Error>> + Send;
     /*fn create(
         &self,
         new_note: NewNote,

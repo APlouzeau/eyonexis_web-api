@@ -1,4 +1,4 @@
-use crate::features::note::model::NoteToList;
+use crate::features::note::model::{NoteToList, NoteToShow};
 use axum::{
     extract::{Path, State},
     Json,
@@ -37,14 +37,15 @@ pub async fn get_notes_by_folder_id(
     Ok(Json(notes))
 }
 
-/* pub async fn get_by_id(
-    Path(id_note): Path<Uuid>,
+pub async fn get_note_by_id(
     State(state): State<AppState>,
+    Path(id_note): Path<Uuid>,
 ) -> Result<Json<NoteToShow>, AppError> {
-    let _note = NoteRepository::get_note_by_id(&state.db, id_note).await?;
-    Ok(Json(_note))
+    let note = state.note_service.get_note_by_id(id_note).await?;
+    Ok(Json(note))
 }
 
+/*
 pub async fn create(
     State(state): State<crate::db::AppState>, // On prend le global state
     Json(create_note_payload): Json<CreateNotePayload>, // Axum extraie et valide automagiquement ton JSON
