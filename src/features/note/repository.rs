@@ -67,9 +67,9 @@ impl NoteRepository for PostgresNoteRepository {
                 subtitle: note.subtitle,
                 folder: note.folder,
                 slug : note.slug,
-                blocks: blocks,
                 created_at: note.created_at,
                 updated_at: note.updated_at,
+                blocks: blocks,
             })
         }
     }
