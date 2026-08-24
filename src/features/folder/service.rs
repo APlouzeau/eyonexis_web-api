@@ -6,12 +6,10 @@ use super::model::FolderNode;
 use super::repository::FolderRepository;
 use crate::features::folder::model::FolderBranch;
 use crate::features::note::model::NoteToList;
-use crate::features::note::service::NoteService;
 
 #[derive(Clone)]
 pub struct FolderService<R: FolderRepository> {
     pub repository: R,
-    pub note_service: NoteService<R, R: NoteRepository>,
 }
 
 impl<R: FolderRepository> FolderService<R> {

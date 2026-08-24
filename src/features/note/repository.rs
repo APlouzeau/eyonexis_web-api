@@ -1,8 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::features::note::model::{NewNote, Note, NoteToList};
-use crate::features::note::model_joined::NoteDetail;
+use crate::features::note::model::NoteToList;
 
 #[derive(Clone)]
 pub struct PostgresNoteRepository {
@@ -10,16 +9,19 @@ pub struct PostgresNoteRepository {
 }
 
 impl NoteRepository for PostgresNoteRepository {
-    fn list(
+    fn list_by_folder(
         &self,
+        id_folder: Uuid,
     ) -> impl std::future::Future<Output = Result<Vec<NoteToList>, sqlx::Error>> + Send {
         async move {
             let notes = sqlx::query_as!(
                 NoteToList,
                 r#"
-            SELECT id_note AS "id: uuid::Uuid", title, subtitle, id_folder
+            SELECT id_note AS "id: uuid::Uuid", title, subtitle
             FROM notes
+            WHERE id_folder = $1
             "#,
+                id_folder
             )
             .fetch_all(&self.pool)
             .await?;
@@ -125,8 +127,9 @@ impl NoteRepository for PostgresNoteRepository {
 }
 
 pub trait NoteRepository {
-    fn list(
+    fn list_by_folder(
         &self,
+        id_folder: Uuid,
     ) -> impl std::future::Future<Output = Result<Vec<NoteToList>, sqlx::Error>> + Send;
     /*fn create(
         &self,

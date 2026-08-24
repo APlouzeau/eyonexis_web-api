@@ -3,13 +3,14 @@ use axum::Router;
 use tokio::net::TcpListener;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
+use crate::features::folder::repository;
 use crate::features::note::repository::PostgresNoteRepository;
 use crate::features::note::routes as note_router;
 use crate::features::note::service::NoteService;
 
-use crate::features::folder::repository::PostgresFolderRepository;
-use crate::features::folder::routes as folder_router;
-use crate::features::folder::service::FolderService;
+use crate::features::folder::{
+    repository::PostgresFolderRepository, routes as folder_router, service::FolderService,
+};
 
 use crate::features::health::routes as health_router;
 
@@ -41,19 +42,13 @@ async fn main() {
         .await
         .expect("Failed to create database pool");
 
-    let note_service = NoteService {
-        repository: PostgresNoteRepository { pool: pool.clone() },
-    };
-
-    let folder_service = FolderService {
-        repository: PostgresFolderRepository { pool: pool.clone() },
-        note_service: note_service.clone(),
-    };
-
     let state = AppState {
-        // AUTO-GENERATED-STATE
-        note_service: note_service,
-        folder_service: folder_service,
+        note_service: NoteService {
+            repository: PostgresNoteRepository { pool: pool.clone() },
+        },
+        folder_service: FolderService {
+            repository: PostgresFolderRepository { pool: pool.clone() },
+        },
     };
 
     let origins: Vec<HeaderValue> = std::env::var("URL_CORS")

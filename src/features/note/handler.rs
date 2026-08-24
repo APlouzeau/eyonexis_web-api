@@ -1,5 +1,9 @@
 use crate::features::note::model::NoteToList;
-use axum::{extract::Path, extract::State, Json};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use axum_macros::{debug_handler, debug_middleware};
 
 use serde::Deserialize;
 use uuid::Uuid;
@@ -7,8 +11,7 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::AppState;
 
-use crate::features::note::model::{BlockType, Note, NoteBlock, NoteToShow};
-use crate::features::note::repository::NoteRepository;
+use crate::features::note::model::BlockType;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateNoteBlockPayload {
@@ -25,9 +28,12 @@ pub struct CreateNotePayload {
     pub blocks: Vec<CreateNoteBlockPayload>,
 }
 
-pub async fn get_all(State(state): State<AppState>) -> Result<Json<Vec<NoteToList>>, AppError> {
-    let notes = state.note_service.list().await?;
-
+#[debug_handler]
+pub async fn get_notes_by_folder_id(
+    State(state): State<AppState>,
+    Path(id_folder): Path<Uuid>,
+) -> Result<Json<Vec<NoteToList>>, AppError> {
+    let notes = state.note_service.list_by_folder(id_folder).await?;
     Ok(Json(notes))
 }
 

@@ -1,6 +1,7 @@
+use uuid::Uuid;
+
 use crate::features::note::model::NoteToList;
 
-use super::model_response::NoteToListResponse;
 use super::repository::NoteRepository;
 
 #[derive(Clone)]
@@ -9,8 +10,8 @@ pub struct NoteService<R: NoteRepository> {
 }
 
 impl<R: NoteRepository> NoteService<R> {
-    pub async fn list(&self) -> Result<Vec<NoteToList>, sqlx::Error> {
-        let notes = self.repository.list().await?;
+    pub async fn list_by_folder(&self, id_folder: Uuid) -> Result<Vec<NoteToList>, sqlx::Error> {
+        let notes = self.repository.list_by_folder(id_folder).await?;
         Ok(notes.into_iter().map(NoteToList::from).collect())
     }
 

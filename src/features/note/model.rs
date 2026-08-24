@@ -45,7 +45,6 @@ pub struct NoteToList {
     pub id: Uuid,
     pub title: String,
     pub subtitle: Option<String>,
-    pub id_folder: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
