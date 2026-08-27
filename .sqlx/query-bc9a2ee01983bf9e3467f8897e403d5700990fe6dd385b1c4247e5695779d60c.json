@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT f.id_folder, f.folder_name, f.parent_id, n.id_note as \"id_note: uuid::Uuid\", n.note_title, n.note_id_folder, n.note_slug\n            FROM folders f\n            LEFT JOIN notes n ON f.id_folder = n.note_id_folder\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_folder",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "folder_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "parent_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_note: uuid::Uuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "note_title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "note_id_folder",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "note_slug",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "bc9a2ee01983bf9e3467f8897e403d5700990fe6dd385b1c4247e5695779d60c"
+}
