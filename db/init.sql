@@ -1,7 +1,7 @@
 -- Base de données Eyonexis Knowledge Base
 -- Schéma pour notes structurées avec blocks et métadonnées
 
-create type block as enum ('text', 'code', 'heading', 'note', 'list');
+create type block as enum ('text', 'code', 'heading', 'tip');
 
 -- Table des langages de programmation
 CREATE TABLE IF NOT EXISTS folders(
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS note_tags(
    FOREIGN KEY(id_tag) REFERENCES tags(id_tag) ON DELETE CASCADE
 );
 
-    CREATE INDEX idx_note_tags_note ON note_tags (id_note);
-    CREATE INDEX idx_note_tags_tag ON note_tags (id_tag);
+CREATE INDEX idx_note_tags_note ON note_tags (id_note);
+CREATE INDEX idx_note_tags_tag ON note_tags (id_tag);
 
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
@@ -121,18 +121,21 @@ INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_ind
 function handleClick() {
   setCount(count + 1);
 }', 3, '{"language": "javascript"}'),
-('950e8400-5440-0000-0000-000000000004', '850e8400-5440-0000-0000-000000000001', 'note', 'Chaque appel à la fonction setter déclenche un re-render du composant. Ne jamais muter l''état directement.', 4, NULL);
+('950e8400-5440-0000-0000-000000000004', '850e8400-5440-0000-0000-000000000001', 'text', 'Chaque appel à la fonction setter déclenche un re-render du composant. Ne jamais muter l''état directement.', 4, NULL);
 
 -- Blocs de la note ownership Rust
 INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_index, metadata) VALUES
 ('950e8400-5440-0000-0000-000000000005', '850e8400-5440-0000-0000-000000000002', 'heading', 'Les trois règles de l''ownership', 1, NULL),
-('950e8400-5440-0000-0000-000000000006', '850e8400-5440-0000-0000-000000000002', 'list', '1. Chaque valeur a un propriétaire unique\n2. Il ne peut y avoir qu''un seul propriétaire à la fois\n3. Quand le propriétaire sort de portée, la valeur est libérée', 2, NULL),
+('950e8400-5440-0000-0000-000000000006', '850e8400-5440-0000-0000-000000000002', 'text', '- Chaque valeur a un propriétaire unique
+- Il ne peut y avoir qu''un seul propriétaire à la fois
+- Quand le propriétaire sort de portée, la valeur est libérée', 2, NULL),
 ('950e8400-5440-0000-0000-000000000007', '850e8400-5440-0000-0000-000000000002', 'code', 'let s1 = String::from("hello");
 let s2 = s1; // s1 est déplacé dans s2
 
 // println!("{}", s1); // Erreur ! s1 n''est plus valide
 println!("{}", s2); // OK', 3, '{"language": "rust"}'),
-('950e8400-5440-0000-0000-000000000008', '850e8400-5440-0000-0000-000000000002', 'note', 'Pour les types qui implémentent Copy (i32, bool, char...), la valeur est copiée automatiquement, pas déplacée.', 4, NULL);
+('950e8400-5440-0000-0000-000000000012', '850e8400-5440-0000-0000-000000000002', 'heading', 'Copy', 4, NULL),
+('950e8400-5440-0000-0000-000000000008', '850e8400-5440-0000-0000-000000000002', 'text', 'Pour les types qui implémentent Copy (i32, bool, char...), la valeur est copiée automatiquement, pas déplacée.', 5, NULL);
 
 -- Blocs de la note closures JS
 INSERT INTO notes_blocks (id_note_block, id_note, block_type, content, order_index, metadata) VALUES
