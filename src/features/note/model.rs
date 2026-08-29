@@ -17,11 +17,7 @@ pub struct Note {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewNote {
-    pub title: String,
-    pub subtitle: Option<String>,
-    pub slug: String,
-    pub id_folder: Uuid,
-    pub blocks: Vec<NoteBlock>,
+    pub id_note: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -91,5 +87,6 @@ pub struct CreateNotePayload {
     pub title: String,
     pub subtitle: Option<String>,
     pub id_folder: Uuid,
+    pub slug: String,
     pub blocks: Vec<CreateNoteBlockPayload>,
 }

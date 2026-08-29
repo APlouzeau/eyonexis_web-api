@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::features::note::model::{NoteToList, NoteToShow};
+use crate::features::note::model::{CreateNotePayload, NewNote, NoteToList, NoteToShow};
 
 use super::repository::NoteRepository;
 
@@ -20,12 +20,18 @@ impl<R: NoteRepository> NoteService<R> {
         Ok(note)
     }
 
-    /*     pub async fn create(&self, new_note: NewNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
-        self.repository.create(new_note).await?;
-        self.get_all().await
+    pub async fn create(&self, new_note: CreateNotePayload) -> Result<(), sqlx::Error> {
+        let id_new_note = NewNote {
+            id_note: Uuid::new_v4(),
+        };
+        self.repository
+            .create_full_note(id_new_note, &new_note)
+            .await?;
+
+        Ok(())
     }
 
-    pub async fn delete(&self, id: DeleteNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
+    /*     pub async fn delete(&self, id: DeleteNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
         self.repository.delete(id).await?;
         self.get_all().await
     } */

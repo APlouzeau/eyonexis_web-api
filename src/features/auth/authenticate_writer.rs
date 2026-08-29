@@ -65,7 +65,7 @@ async fn from_request_parts_test(pool: PgPool) -> sqlx::Result<()> {
     #[derive(Clone, FromRef)]
     pub struct AppState {
         pub test_service: AuthService<PostgresAuthRepository>,
-    };
+    }
 
     let state = AppState {
         test_service: AuthService {

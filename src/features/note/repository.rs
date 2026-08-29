@@ -1,7 +1,7 @@
-use sqlx::PgPool;
+use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
-use crate::features::note::model::{NoteBlock, NoteSummary, NoteToList, NoteToShow, BlockType};
+use crate::features::note::model::{BlockType, CreateNoteBlockPayload, CreateNotePayload, NewNote, NoteBlock, NoteSummary, NoteToList, NoteToShow};
 
 #[derive(Clone)]
 pub struct PostgresNoteRepository {
@@ -74,38 +74,52 @@ impl NoteRepository for PostgresNoteRepository {
         }
     }
 
-    /*  fn create(
-        &self,
-        new_note: NewNote,
-    ) -> impl std::future::Future<Output = Result<Note, sqlx::Error>> + Send {
+fn create_full_note(
+    &self,
+    id_new_note: NewNote,
+    new_note: &CreateNotePayload,
+) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send {
         async move {
-            let id_note = Uuid::new_v4();
-            let mut tx = &self.pool.begin().await?;
-            let note = sqlx::query!(
+            let mut tx = self.pool.begin().await?;
+            Self::create_note( &mut *tx, &id_new_note, new_note ).await?;
+            for note_block in &new_note.blocks {
+                Self::insert_note_block(&mut  *tx, &id_new_note, &note_block).await?;
+            }
+            tx.commit().await?;
+            Ok(())
+        }
+    }
+
+    fn create_note(
+        conn: &mut PgConnection,
+        id_new_note: &NewNote,
+        new_note: &CreateNotePayload,
+    ) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send {
+        async move {
+            sqlx::query!(
                 r#"
-            INSERT INTO notes (id_note, note_title, note_subtitle, note_slug, note_id_folder)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO notes (id_note, title, subtitle, slug, id_folder)
+            VALUES ($1, $2, $3, $4, $5)
             "#,
-                id_note,
+                id_new_note.id_note,
                 new_note.title,
                 new_note.subtitle,
                 new_note.slug,
                 new_note.id_folder
             )
-            .execute(&mut *tx)
+            .execute(conn)
             .await?;
 
-            tx.commit().await?; // On commit la transaction, tout est validé en DB
-
-            Ok(note)
+            Ok(())
         }
-    } */
+    }
 
-    /*     async fn create_note_block(
-        e: impl Executor<'_, Database = sqlx::Postgres>,
-        id_note: Uuid,
-        block: &CreateNoteBlockPayload,
-    ) -> Result<(), AppError> {
+    fn insert_note_block(
+        conn: &mut PgConnection,
+        id_note: &NewNote,
+        note_block: &CreateNoteBlockPayload,
+    ) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send {
+        async move {
         let id_note_block = uuid::Uuid::new_v4();
         sqlx::query!(
             r#"
@@ -113,16 +127,17 @@ impl NoteRepository for PostgresNoteRepository {
             VALUES ($1, $2, $3, $4, $5, $6)
             "#,
             id_note_block,
-            id_note,
-            block.block_type as BlockType, // Assure-toi que le type de block est correctement converti pour la DB
-            block.content,
-            block.order_index,
-            block.metadata.as_ref().map(|m| m) // Convertit le JSON en String pour la DB
+            id_note.id_note,
+            note_block.block_type as BlockType, // Assure-toi que le type de block est correctement converti pour la DB
+            note_block.content,
+            note_block.order_index,
+            note_block.metadata.as_ref().map(|m| m) // Convertit le JSON en String pour la DB
         )
-        .execute(e)
+        .execute(conn)
         .await?;
         Ok(())
-    } */
+    }
+    } 
 }
 
 pub trait NoteRepository {
@@ -134,12 +149,23 @@ pub trait NoteRepository {
         &self,
         id_note: Uuid,
     ) -> impl std::future::Future<Output = Result<NoteToShow, sqlx::Error>> + Send;
-    /*fn create(
-        &self,
-        new_note: NewNote,
-    ) -> impl std::future::Future<Output = Result<Vec<NoteDetail>, sqlx::Error>> + Send;
-     fn delete(
+fn create_full_note(
+    &self,
+    id_new_note: NewNote,
+    new_note: &CreateNotePayload,
+) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send;
+    fn create_note(
+        conn: &mut PgConnection,
+        id_new_note : &NewNote,
+        new_note: &CreateNotePayload,
+    ) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send;
+    fn insert_note_block(
+        conn: &mut PgConnection,
+        id_note: &NewNote,
+        note_block: &CreateNoteBlockPayload,
+    ) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send;
+    /*  fn delete(
         &self,
         note: DeleteNote,
     ) -> impl std::future::Future<Output = Result<Vec<NoteDetail>, sqlx::Error>> + Send; */
-}
+} 
