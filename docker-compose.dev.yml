@@ -19,6 +19,11 @@ services:
     networks:
       - web
       - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
 
 volumes:
   db_data:

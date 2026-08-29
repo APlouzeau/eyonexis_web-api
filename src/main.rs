@@ -3,7 +3,8 @@ use axum::Router;
 use tokio::net::TcpListener;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
-use crate::features::folder::repository;
+use crate::features::auth::repository::PostgresAuthRepository;
+use crate::features::auth::service::AuthService;
 use crate::features::note::repository::PostgresNoteRepository;
 use crate::features::note::routes as note_router;
 use crate::features::note::service::NoteService;
@@ -23,6 +24,7 @@ pub struct AppState {
     // AUTO-GENERATED-SERVICE
     pub note_service: NoteService<PostgresNoteRepository>,
     pub folder_service: FolderService<PostgresFolderRepository>,
+    pub auth_service: AuthService<PostgresAuthRepository>,
 }
 
 #[tokio::main]
@@ -48,6 +50,9 @@ async fn main() {
         },
         folder_service: FolderService {
             repository: PostgresFolderRepository { pool: pool.clone() },
+        },
+        auth_service: AuthService {
+            repository: PostgresAuthRepository { pool: pool.clone() },
         },
     };
 

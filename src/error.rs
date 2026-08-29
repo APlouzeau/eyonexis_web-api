@@ -11,6 +11,7 @@ pub enum AppError {
     // Quelques erreurs courantes pour commencer
     DatabaseError(sqlx::Error),
     NotFound(String),
+    Unauthorized(String),
 }
 
 impl IntoResponse for AppError {
@@ -22,11 +23,13 @@ impl IntoResponse for AppError {
                 println!("DANGER INTERNAL DB ERROR: {}", err);
 
                 // Mais au client, on renvoie une 500 générique (on ne fuite jamais les infos BDD !)
-                (StatusCode::INTERNAL_SERVER_ERROR, "Erreur interne du serveur".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Erreur interne du serveur".to_string(),
+                )
             }
-            AppError::NotFound(message) => {
-                (StatusCode::NOT_FOUND, message)
-            }
+            AppError::NotFound(message) => (StatusCode::NOT_FOUND, message),
+            AppError::Unauthorized(message) => (StatusCode::UNAUTHORIZED, message),
         };
 
         // On construit une réponse JSON propre

@@ -1,4 +1,4 @@
-mod handler;
+mod handlers;
 pub mod model;
 mod model_joined;
 mod model_response;

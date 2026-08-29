@@ -78,3 +78,18 @@ pub enum BlockType {
     Note,
     List,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct CreateNoteBlockPayload {
+    pub block_type: BlockType,
+    pub content: String,
+    pub order_index: i32,
+    pub metadata: Option<serde_json::Value>,
+}
+#[derive(Debug, Deserialize)]
+pub struct CreateNotePayload {
+    pub title: String,
+    pub subtitle: Option<String>,
+    pub id_folder: Uuid,
+    pub blocks: Vec<CreateNoteBlockPayload>,
+}
