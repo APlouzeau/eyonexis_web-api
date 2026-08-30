@@ -1,8 +1,14 @@
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 
-use super::handler;
 use crate::AppState;
 
+use super::handlers::{read, write};
+
 pub fn routes() -> Router<AppState> {
-    Router::new().route("/folder-tree", get(handler::get_folder_tree))
+    Router::new()
+        .route("/folder-tree", get(read::get_folder_tree))
+        .route("/create", post(write::create))
 }

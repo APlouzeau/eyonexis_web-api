@@ -1,7 +1,7 @@
 use axum::{extract::State, Json};
 
-use super::model::FolderNode;
 use crate::error::AppError;
+use crate::features::folder::model::FolderNode;
 use crate::AppState;
 
 pub async fn get_folder_tree(
