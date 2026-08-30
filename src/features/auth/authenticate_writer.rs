@@ -1,6 +1,6 @@
 use axum::{
-    extract::{FromRef, FromRequestParts, State},
-    http::{request::Parts, StatusCode},
+    extract::{FromRef, FromRequestParts},
+    http::request::Parts,
 };
 use axum_macros::FromRef;
 use sha2::{Digest, Sha256};
@@ -9,7 +9,6 @@ use sqlx::PgPool;
 use crate::{
     error::AppError,
     features::auth::{repository::PostgresAuthRepository, service::AuthService},
-    AppState,
 };
 
 pub struct ExtractAuthToken;

@@ -20,19 +20,100 @@ impl<R: NoteRepository> NoteService<R> {
         Ok(note)
     }
 
-    pub async fn create(&self, new_note: CreateNotePayload) -> Result<(), sqlx::Error> {
+    pub async fn create(&self, new_note: &CreateNotePayload) -> Result<Uuid, sqlx::Error> {
         let id_new_note = NewNote {
             id_note: Uuid::new_v4(),
         };
         self.repository
-            .create_full_note(id_new_note, &new_note)
+            .create_full_note(&id_new_note, &new_note)
             .await?;
 
-        Ok(())
+        Ok(id_new_note.id_note)
     }
 
     /*     pub async fn delete(&self, id: DeleteNote) -> Result<Vec<NoteResponse>, sqlx::Error> {
         self.repository.delete(id).await?;
         self.get_all().await
     } */
+}
+
+#[cfg(test)]
+mod tests {
+    use std::iter::zip;
+
+    use axum_macros::FromRef;
+    use sqlx::PgPool;
+
+    use super::*;
+    use crate::features::note::{
+        model::{
+            BlockType::{Heading, Text},
+            CreateNoteBlockPayload,
+        },
+        repository::PostgresNoteRepository,
+    };
+
+    #[sqlx::test]
+    async fn create_test(pool: PgPool) -> sqlx::Result<()> {
+        let id_folder = Uuid::new_v4();
+        let mut note_blocks = Vec::new();
+        note_blocks.push(CreateNoteBlockPayload {
+            block_type: Heading,
+            content: "Titre de la section".to_string(),
+            order_index: 1,
+            metadata: None,
+        });
+        note_blocks.push(CreateNoteBlockPayload {
+            block_type: Text,
+            content: "Contenu de la section".to_string(),
+            order_index: 2,
+            metadata: None,
+        });
+
+        let new_note = CreateNotePayload {
+            title: "Test de note".to_string(),
+            subtitle: Some("Ceci est un test".to_string()),
+            id_folder: id_folder,
+            slug: "test-de-note".to_string(),
+            blocks: note_blocks,
+        };
+        #[derive(Clone, FromRef)]
+        pub struct AppState {
+            pub test_service: NoteService<PostgresNoteRepository>,
+        }
+
+        let state = AppState {
+            test_service: NoteService {
+                repository: PostgresNoteRepository { pool: pool.clone() },
+            },
+        };
+
+        sqlx::query!(
+            r#"
+        INSERT INTO folders
+        (id_folder, folder_name, folder_slug)
+        VALUES 
+        ($1, $2, $3)"#,
+            id_folder,
+            "Dossier de test",
+            "dossier-de-test"
+        )
+        .execute(&pool)
+        .await?;
+
+        let id_note = state.test_service.create(&new_note).await?;
+        let get_note = state.test_service.get_note_by_id(id_note).await?;
+
+        assert_eq!(get_note.title, new_note.title);
+        assert_eq!(get_note.subtitle, new_note.subtitle);
+        assert_eq!(get_note.slug, new_note.slug);
+        for (a, b) in zip(get_note.blocks, new_note.blocks) {
+            assert_eq!(a.content, b.content);
+            assert_eq!(a.order_index, b.order_index);
+            assert_eq!(a.metadata, b.metadata);
+            assert_eq!(a.block_type, b.block_type);
+        }
+
+        Ok(())
+    }
 }

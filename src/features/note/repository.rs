@@ -41,6 +41,7 @@ impl NoteRepository for PostgresNoteRepository {
             FROM notes n
             INNER JOIN folders f ON n.id_folder = f.id_folder
             WHERE n.id_note = $1
+            
             "#,
                 id_note
             )            
@@ -76,7 +77,7 @@ impl NoteRepository for PostgresNoteRepository {
 
 fn create_full_note(
     &self,
-    id_new_note: NewNote,
+    id_new_note: &NewNote,
     new_note: &CreateNotePayload,
 ) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send {
         async move {
@@ -149,11 +150,11 @@ pub trait NoteRepository {
         &self,
         id_note: Uuid,
     ) -> impl std::future::Future<Output = Result<NoteToShow, sqlx::Error>> + Send;
-fn create_full_note(
-    &self,
-    id_new_note: NewNote,
-    new_note: &CreateNotePayload,
-) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send;
+    fn create_full_note(
+        &self,
+        id_new_note: &NewNote,
+        new_note: &CreateNotePayload,
+    ) -> impl std::future::Future<Output = Result<(), sqlx::Error>> + Send;
     fn create_note(
         conn: &mut PgConnection,
         id_new_note : &NewNote,

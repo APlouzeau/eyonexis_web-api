@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
+use slug::slugify;
 use uuid::Uuid;
 
 use super::model::FolderNode;
 use super::repository::FolderRepository;
-use crate::features::folder::model::FolderBranch;
+use crate::features::folder::model::{CreateFolderData, CreateFolderPayload, FolderBranch};
 use crate::features::note::model::NoteToList;
 
 #[derive(Clone)]
@@ -34,12 +35,22 @@ impl<R: FolderRepository> FolderService<R> {
         Ok(result)
     }
 
-    /*     pub async fn create(&self, new_folder: NewFolder) -> Result<Vec<FolderResponse>, sqlx::Error> {
-        self.repository.create(new_folder).await?;
-        self.get_all().await
+    pub async fn create(
+        &self,
+        new_folder: &CreateFolderPayload,
+    ) -> Result<FolderBranch, sqlx::Error> {
+        let slug = slugify(&new_folder.folder_name);
+        let new_folder_data = CreateFolderData {
+            id_folder: Uuid::new_v4(),
+            folder_name: new_folder.folder_name.to_string(),
+            folder_slug: slug,
+            parent_id: new_folder.parent_id,
+        };
+        let response = self.repository.create(new_folder_data).await?;
+        Ok(response)
     }
 
-    pub async fn delete(&self, id: DeleteFolder) -> Result<Vec<FolderResponse>, sqlx::Error> {
+    /*pub async fn delete(&self, id: DeleteFolder) -> Result<Vec<FolderResponse>, sqlx::Error> {
         self.repository.delete(id).await?;
         self.get_all().await
     } */
@@ -68,21 +79,37 @@ fn build_node(
     }
 }
 
-fn attach_notes(node: FolderNode, notes_per_folder: &HashMap<Uuid, Vec<NoteToList>>) -> FolderNode {
-    let notes = notes_per_folder
-        .get(&node.id_folder)
-        .cloned()
-        .unwrap_or_default();
+#[cfg(test)]
+mod tests {
+    use axum_macros::FromRef;
+    use sqlx::PgPool;
 
-    let mut children = Vec::new();
-    for child in node.children {
-        children.push(attach_notes(child, notes_per_folder));
-    }
+    use crate::features::folder::{
+        model::CreateFolderPayload, repository::PostgresFolderRepository, service::FolderService,
+    };
 
-    FolderNode {
-        id_folder: node.id_folder,
-        folder_name: node.folder_name,
-        children,
-        notes,
+    #[sqlx::test]
+    async fn create_test(pool: PgPool) -> sqlx::Result<()> {
+        let folder_to_test_data = CreateFolderPayload {
+            folder_name: "Un beau dossier de test".to_string(),
+            parent_id: None,
+        };
+        #[derive(Clone, FromRef)]
+        pub struct AppState {
+            pub test_service: FolderService<PostgresFolderRepository>,
+        }
+
+        let state = AppState {
+            test_service: FolderService {
+                repository: PostgresFolderRepository { pool: pool.clone() },
+            },
+        };
+
+        let folder_to_test = state.test_service.create(&folder_to_test_data).await?;
+
+        assert_eq!(folder_to_test_data.folder_name, folder_to_test.folder_name);
+        assert_eq!(folder_to_test_data.parent_id, folder_to_test.parent_id);
+
+        Ok(())
     }
 }

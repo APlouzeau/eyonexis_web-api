@@ -1,5 +1,6 @@
 use axum::http::HeaderValue;
 use axum::Router;
+use axum_macros::FromRef;
 use tokio::net::TcpListener;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
@@ -19,7 +20,7 @@ mod db;
 mod error;
 mod features;
 
-#[derive(Clone)]
+#[derive(Clone, FromRef)]
 pub struct AppState {
     // AUTO-GENERATED-SERVICE
     pub note_service: NoteService<PostgresNoteRepository>,

@@ -65,7 +65,7 @@ pub struct NoteSummary {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, Copy)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, Copy, PartialEq)]
 #[sqlx(type_name = "block", rename_all = "lowercase")]
 pub enum BlockType {
     Text,
