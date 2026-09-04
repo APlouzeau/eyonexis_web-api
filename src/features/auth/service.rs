@@ -9,11 +9,9 @@ pub struct AuthService<R: AuthRepository> {
 
 impl<R: AuthRepository> AuthService<R> {
     pub async fn verify_token(&self, token_received: String) -> Result<(), AppError> {
-        let mut hasher = Sha256::new();
-        hasher.update(token_received);
-        let token_received_hashed = hasher.finalize();
+        println!("Token reçu (brut) service : {}", token_received);
         self.repository
-            .verify_token_hashed(hex::encode(token_received_hashed))
+            .verify_token_hashed(token_received)
             .await?
             .ok_or_else(|| AppError::Unauthorized("Non autorisé".to_string()))?;
         Ok(())

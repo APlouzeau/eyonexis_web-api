@@ -13,6 +13,7 @@ impl AuthRepository for PostgresAuthRepository {
         token_received: String,
     ) -> impl std::future::Future<Output = Result<Option<AuthRequest>, sqlx::Error>> + Send {
         async move {
+            println!("Token reçu (brut) repo : {}", token_received);
             let token_registered = sqlx::query_as!(
                 AuthRequest,
                 r#"

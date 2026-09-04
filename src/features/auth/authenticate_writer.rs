@@ -29,6 +29,7 @@ where
             .map_err(|_| AppError::Unauthorized("Data Type no supported".to_string()))?
             .strip_prefix("Bearer ")
             .ok_or_else(|| AppError::Unauthorized("No Bearer".to_string()))?;
+        println!("Token reçu (brut) : {}", token);
 
         AuthService::from_ref(state)
             .verify_token(token.to_string())
