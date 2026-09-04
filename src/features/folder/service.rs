@@ -5,7 +5,9 @@ use uuid::Uuid;
 
 use super::model::FolderNode;
 use super::repository::FolderRepository;
-use crate::features::folder::model::{CreateFolderData, CreateFolderPayload, FolderBranch};
+use crate::features::folder::model::{
+    CreateFolderData, CreateFolderPayload, FolderBranch, FolderContent,
+};
 use crate::features::note::model::NoteToList;
 
 #[derive(Clone)]
@@ -48,6 +50,14 @@ impl<R: FolderRepository> FolderService<R> {
         };
         let response = self.repository.create(new_folder_data).await?;
         Ok(response)
+    }
+
+    pub async fn get_folder_content(
+        &self,
+        parent_id: &Uuid,
+    ) -> Result<Vec<FolderContent>, sqlx::Error> {
+        let folder_content = self.repository.get_folder_content(&parent_id).await?;
+        Ok(folder_content)
     }
 
     /*pub async fn delete(&self, id: DeleteFolder) -> Result<Vec<FolderResponse>, sqlx::Error> {

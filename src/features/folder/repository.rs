@@ -1,6 +1,9 @@
 use sqlx::PgPool;
+use uuid::Uuid;
 
-use crate::features::folder::model::CreateFolderData;
+use crate::features::folder::model::{
+    CreateFolderData, CreateFolderPayload, FolderContent, FolderNode,
+};
 
 use super::model::FolderBranch;
 
@@ -56,12 +59,37 @@ impl FolderRepository for PostgresFolderRepository {
             Ok(result)
         }
     }
+
+    fn get_folder_content(
+        &self,
+        parent_id: &Uuid,
+    ) -> impl std::future::Future<Output = Result<Vec<FolderContent>, sqlx::Error>> + Send {
+        async move {
+            let result = sqlx::query_as!(
+                FolderContent,
+                r#"
+            SELECT 
+            f.id_folder as "id_folder: uuid::Uuid", f.folder_name
+            FROM folders f
+            WHERE parent_id = $1"#,
+                parent_id
+            )
+            .fetch_all(&self.pool)
+            .await?;
+
+            Ok(result)
+        }
+    }
 }
 
 pub trait FolderRepository {
     fn get_folder_tree(
         &self,
     ) -> impl std::future::Future<Output = Result<Vec<FolderBranch>, sqlx::Error>> + Send;
+    fn get_folder_content(
+        &self,
+        parent_id: &Uuid,
+    ) -> impl std::future::Future<Output = Result<Vec<FolderContent>, sqlx::Error>> + Send;
     fn create(
         &self,
         new_folder: CreateFolderData,

@@ -11,4 +11,5 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/folder-tree", get(read::get_folder_tree))
         .route("/create", post(write::create))
+        .route("/folder-content", post(write::folder_content))
 }

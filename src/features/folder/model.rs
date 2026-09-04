@@ -28,6 +28,14 @@ pub struct CreateFolderPayload {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+
+pub struct FolderContent {
+    pub id_folder: Uuid,
+    pub folder_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateFolderData {
     pub id_folder: Uuid,
     pub folder_name: String,
